@@ -1,0 +1,115 @@
+---
+title: "Games As Art"
+author: "anonymous"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+This RMD File prepares one DataSet for the qualitative analysis, one DataSet for the demographic analysis and one DataSet for the network analysis.
+The Input is the RawData.xlsx file in the folder "RawData"
+The Outputs are saved in the respective Analysis Folders.
+
+
+#__Setup: Always Run!__#
+```{r}
+if(!require(tidyverse)){install.packages('tidyverse')}
+#if(!require(patchwork)){install.packages('patchwork')}
+#if(!require(summarytools)){install.packages('summarytools')}
+library(tidyverse, readxl)
+#library(summarytools, patchwork)
+
+##Set Working DIR so Input&Output is correct
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+##Import Data Set
+DataSet <- read_csv("../RawData/RawData.csv")
+```
+#__Renaming Columns__#
+```{r}
+#Array for AESTHEMOS Names:
+AESTHEMOS1 <- c("IntellectualChallenge_1_AESTHEMOS","Relaxation_1_AESTHEMOS","FeelingOfBeauty_1_AESTHEMOS","Enchantment_1_AESTHEMOS","IntellectualChallenge_2_AESTHEMOS","FeelingOfUgliness_1_AESTHEMOS","BeingMoved_1_AESTHEMOS","Energy_1_AESTHEMOS","Enchantment_2_AESTHEMOS","Relaxation_2_AESTHEMOS","Humor_1_AESTHEMOS","Confusion_1_AESTHEMOS","Nostalgia_1_AESTHEMOS","Nostalgia_2_AESTHEMOS","Uneasiness_1_AESTHEMOS", "Vitality_1_AESTHEMOS", "Fascination_1_AESTHEMOS", "BeingMoved_2_AESTHEMOS", "Interest_1_AESTHEMOS", "Awe_1_AESTHEMOS", "Humor_2_AESTHEMOS")
+
+AESTHEMOS2 <- c("FeelingOfBeauty_2_AESTHEMOS", "Joy_1_AESTHEMOS", "Interest_2_AESTHEMOS", "Fascination_2_AESTHEMOS", "Vitality_2_AESTHEMOS", "Surprise_1_AESTHEMOS", "Insight_1_AESTHEMOS", "Sadness_1_AESTHEMOS", "Anger_1_AESTHEMOS", "Boredom_1_AESTHEMOS", "Insight_2_AESTHEMOS", "Sadness_2_AESTHEMOS", "Anger_2_AESTHEMOS", "Uneasiness_2_AESTHEMOS", "Surprise_2_AESTHEMOS", "Awe_2_AESTHEMOS", "Boredom_2_AESTHEMOS", "FeelingOfUgliness_2_AESTHEMOS", "Confusion_2_AESTHEMOS", "Joy_2_AESTHEMOS", "Energy_2_AESTHEMOS")
+
+DataSet <- DataSet %>%
+  rename("GamesAsArt?Y/N"=`Task. Did_you_ever_ex.._`) %>%
+  rename("DescriptionOfExperience"=`Description. Please_bring_to.._`) %>%
+  rename("GameTitle"=`Game. What_is_the_tit.._`) %>%
+  rename("WhyIsThisExperienceArt?"=`Whyart. In_your_opinion.._`)
+  names(DataSet)[32:52] <- AESTHEMOS1
+  names(DataSet)[53:73] <- AESTHEMOS2
+  
+```
+
+
+#__Removing Participants__#
+```{r}
+
+DataSet_RM <- DataSet %>%
+  #Removing all Test Data (Any "participant" coming from the Lime Survey Admin Page)#
+  filter(str_detect(`refurl. Referrer_URL`, "admin", negate = TRUE)) %>%
+  #Removing all people who didn't finish (I.e., ended before the check for bonus questions (page 10))
+  filter(`lastpage. Last_page`>=10) %>%
+  #Removing anybody who did not give consent
+  filter(`InformedConsent[IC1]. Informed_Consen..__[I_have_read_and.._]` =="Yes" & 
+           `InformedConsent[IC2]. Informed_Consen..__[I_agree_to_part.._]`=="Yes" & 
+           `InformedConsent[IC3]. Informed_Consen..__[I_understand_th.._]`=="Yes" & 
+           `InformedConsent[IC4]. Informed_Consen..__[I_understand_th.._]`=="Yes" & 
+           `InformedConsent[IC5]. Informed_Consen..__[I_understand_an.._]`=="Yes" & 
+           `InformedConsent[IC6]. Informed_Consen..__[I_am_at_least_1.._]`=="Yes") %>%
+  #Removing anybody younger than 18
+  filter(!`Age. How_old_are_you?`<18) %>%
+  #Removing anyone with an English level <3
+  filter(`EnglishLevel. On_a_scale_from.._`>2)
+```
+
+#__Removing Junk Columns__#
+```{r}
+DataSet_Cleaned <- DataSet_RM %>%
+  select(!`submitdate. Date_submitted`:`InformedConsent[IC6]. Informed_Consen..__[I_am_at_least_1.._]`) %>%
+  select(!`Task2. Please_bring_to.._`) %>%
+  select(!`NoIC. Thank_you_for_y.._`) %>%
+  select(!`Success. Thank_you_very_.._`)
+```
+
+##__Creating Network Analysis DataSet__##
+```{r}
+##Extract all the relevant Columns for the network analysis
+DataSet_NetworkAnalysis <- DataSet_Cleaned %>%
+  select(`id. Response_ID`, +
+  #AesthemosData
+    ends_with("_AESTHEMOS") +
+  #DemographicData
+    2:5, +
+  #Expertise
+    63:88
+    )
+
+
+##Save DataSet as CSV in folder MainAnalyses/NetworkAnalysis
+write.csv(DataSet_NetworkAnalysis, file = "../MainAnalyses/NetworkAnalysis/NetworkAnalysis_DataFile.csv")
+```
+
+##_Creating Qualitative Data Analysis DataSet__#
+```{r}
+##Extract all the relevant columns for the qualitative Data Analysis
+DataSet_Qualitative <- DataSet_Cleaned %>%
+  group_by(`GamesAsArt?Y/N`) %>%
+  select(`id. Response_ID`, +
+  #Qualitative Data
+  6:13,  +
+  90:98, +
+  14:19, +  
+  82:86  
+  )  
+    
+##Save DataSet as CSV in Folder
+write.csv(DataSet_Qualitative, file = "../MainAnalyses/QualitativeAnalysis/QualitativeAnalysis_DataFile.csv")
+```
+
