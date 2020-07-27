@@ -19,10 +19,7 @@ The Outputs are saved in the respective Analysis Folders.
 #__Setup: Always Run!__#
 ```{r}
 if(!require(tidyverse)){install.packages('tidyverse')}
-#if(!require(patchwork)){install.packages('patchwork')}
-#if(!require(summarytools)){install.packages('summarytools')}
 library(tidyverse, readxl)
-#library(summarytools, patchwork)
 
 ##Set Working DIR so Input&Output is correct
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -100,12 +97,15 @@ write.csv(DataSet_NetworkAnalysis, file = "../MainAnalyses/NetworkAnalysis/Netwo
 ```{r}
 ##Extract all the relevant columns for the qualitative Data Analysis
 DataSet_Qualitative <- DataSet_Cleaned %>%
-  group_by(`GamesAsArt?Y/N`) %>%
+  arrange(`GamesAsArt?Y/N`) %>%
   select(`id. Response_ID`, +
   #Qualitative Data
   6:13,  +
+  #Bonus Questions  
   90:98, +
-  14:19, +  
+  #No Art Experience  
+  14:19, +
+  #Favourite Games  
   82:86  
   )  
     
