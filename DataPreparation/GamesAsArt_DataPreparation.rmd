@@ -25,7 +25,7 @@ library(tidyverse, readxl)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 ##Import Data Set
-DataSet <- read_csv("../RawData/RawData.csv")
+DataSet <- read_tsv("../RawData/RawData.csv")
 ```
 #__Renaming Columns__#
 ```{r}
