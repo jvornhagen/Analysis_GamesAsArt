@@ -39,8 +39,9 @@ DataSet <- DataSet %>%
   rename("DescriptionOfExperience"=`Description. Please_bring_to.._`) %>%
   rename("GameTitle"=`Game. What_is_the_tit.._`) %>%
   rename("WhyIsThisExperienceArt?"=`Whyart. In_your_opinion.._`)
-  names(DataSet)[32:52] <- AESTHEMOS1
-  names(DataSet)[53:73] <- AESTHEMOS2
+
+names(DataSet)[32:52] <- AESTHEMOS1
+names(DataSet)[53:73] <- AESTHEMOS2
   
 ```
 
@@ -81,7 +82,7 @@ DataSet_Cleaned <- DataSet_RM %>%
 DataSet_NetworkAnalysis <- DataSet_Cleaned %>%
   select(`id. Response_ID`, +
   #AesthemosData
-    ends_with("_AESTHEMOS") +
+    ends_with("_AESTHEMOS"), +
   #DemographicData
     2:5, +
   #Expertise
