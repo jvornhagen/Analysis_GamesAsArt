@@ -1,0 +1,1063 @@
+---
+title: "Descriptive Analysis"
+author: "Anonymous"
+date: "13 8 2020"
+output: 
+  html_document:
+    theme: sandstone
+---
+
+
+```{r setup, include=TRUE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+This doc gives some exploratory insight into the DataSet
+
+
+```{r  eval=TRUE, include=FALSE}
+
+# Setup: Always Run!
+# This gets all packages and the file.
+
+if(!require(tidyverse)){install.packages('tidyverse')}
+if(!require(summarytools)){install.packages('summarytools')}
+if(!require(patchwork)){install.packages('patchwork')}
+if(!require(psy)){install.packages('psy')}
+library(tidyverse, summarytools, patchwork)
+
+##Set Working DIR so Input&Output is correct
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+##Import Data Set
+DataSet <- read_csv("DescriptiveAnalysis_DataFile.csv")
+```
+
+
+```{r}
+#Prepare the DataSet
+
+  DataSet <- DataSet %>%
+    mutate(`Gender. What_is_your_ge.._` = as.factor(DataSet$`Gender. What_is_your_ge.._`))
+```
+
+A total of *n=*`r nrow(DataSet)` completed the questionnaire at least to the point of the bonus questions.
+
+
+# Demographics:
+```{r}
+FreqAge <- DataSet %>%
+  descr(var = `Age. How_old_are_you?`, stats = c("mean", "Sd"))
+
+
+FreqGender <- DataSet %>%
+    freq(var = `Gender. What_is_your_ge.._`, order = "freq", report.nas = FALSE, totals = FALSE, cumul = FALSE)
+
+freqArt <- DataSet %>%
+  freq(var = `GamesAsArt?Y/N`, order = "freq", report.nas = FALSE, totals = FALSE, cumul = FALSE)
+
+
+#Create labels for Graph
+LabelsWithN <- c(
+  sprintf("Man(%s)", FreqGender["Man","Freq"]),
+  sprintf("Woman(%s)", FreqGender["Woman","Freq"]),
+  sprintf("Non-Binary(%s)", FreqGender["Non-Binary","Freq"]),
+  sprintf("Other(%s)", FreqGender["Other","Freq"]),
+  sprintf("Prefer Not To Disclose(%s)", FreqGender["Prefer not to disclose","Freq"])
+)
+  
+d1 <- DataSet %>%
+  mutate(`Gender. What_is_your_ge.._` = fct_recode(`Gender. What_is_your_ge.._`, "Man(105)" = "Man", "Woman(51)" = "Woman", "Non-Binary(12)" = "Non-Binary", "Other(4)" = "Other", "Prefer Not \n To Disclose(2)" = "Prefer not to disclose")) %>%
+  ggplot(aes(x = `Gender. What_is_your_ge.._` , y = `Age. How_old_are_you?`, main = "Age Distribution By Gender")) +
+    geom_violin() +
+    geom_boxplot(width=0.1) +
+    xlab("Gender (n)") +
+    #theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ylab("Age")
+
+d2 <-   ggplot(DataSet, aes(x="All (174)", y = `Age. How_old_are_you?`, main = "Age Distribution By Gender")) +
+    geom_violin() +
+    geom_boxplot(width=0.1) +
+    xlab("Gender (n)") +
+    ylab("")
+
+```
+
+Almost all participants stated, that they did experience a videogame as art:
+`r knitr::kable(freqArt[1:2,1:2])`
+
+Age and Gender were distributed as follows:
+```{r} 
+d1+d2 + 
+  plot_layout(widths=c(3,1)) +
+  plot_annotation(title = "Distribution of Ages and Gender")
+```
+
+
+# Descriptives for the AESTHEMOS
+
+## General Descriptive AESTHEMOS Data
+
+The following tables feature the Mean and SD of each Item and Subscale of the AESTHEMOS
+```{r  echo=FALSE}
+AESTHEMOSDescript <- DataSet %>%
+  select(ends_with("_AESTHEMOS")) %>%
+  filter(!is.na(FeelingOfBeauty_1_AESTHEMOS))
+  
+      
+FeelingOfBeautyDescript <- AESTHEMOSDescript %>%
+  summarise(Mean_LikedIt = mean(FeelingOfBeauty_1_AESTHEMOS),
+              SD_LikedIt = sd(FeelingOfBeauty_1_AESTHEMOS),
+            Mean_Beautiful = mean(FeelingOfBeauty_2_AESTHEMOS),
+              SD_Beautiful = sd(FeelingOfBeauty_2_AESTHEMOS),
+            Mean_FeelingOfBeauty = (mean(FeelingOfBeauty_1_AESTHEMOS)+mean(FeelingOfBeauty_2_AESTHEMOS))/2,
+              PooledSD_FeelingOfBeauty = sqrt((sd(FeelingOfBeauty_1_AESTHEMOS)^2 + sd(FeelingOfBeauty_2_AESTHEMOS)^2)/2)
+            )
+
+
+FascinationDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Impressed = mean(Fascination_1_AESTHEMOS),
+              SD_Impressed = sd(Fascination_1_AESTHEMOS),
+            Mean_Fascinated = mean(Fascination_2_AESTHEMOS),
+              SD_Fascinated = sd(Fascination_2_AESTHEMOS),
+            Mean_Fascination = (mean(Fascination_1_AESTHEMOS)+mean(Fascination_2_AESTHEMOS))/2,
+              PooledSD_Fascination = sqrt((sd(Fascination_1_AESTHEMOS)^2 + sd(Fascination_2_AESTHEMOS)^2)/2)
+            )
+
+
+BeingMovedDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_DeeplyMoved = mean(BeingMoved_1_AESTHEMOS),
+              SD_DeeplyMoved = sd(BeingMoved_1_AESTHEMOS),
+            Mean_Touched = mean(BeingMoved_2_AESTHEMOS),
+              SD_Touched = sd(BeingMoved_2_AESTHEMOS),
+            Mean_BeingMoved = (mean(BeingMoved_1_AESTHEMOS)+mean(BeingMoved_2_AESTHEMOS))/2,
+              PooledSD_BeingMoved = sqrt((sd(BeingMoved_1_AESTHEMOS)^2 + sd(BeingMoved_2_AESTHEMOS)^2)/2)
+            )
+
+AweDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Sublime = mean(Awe_1_AESTHEMOS),
+              SD_Sublime = sd(Awe_1_AESTHEMOS),
+            Mean_FeltAwe = mean(Awe_2_AESTHEMOS),
+              SD_FeltAwe = sd(Awe_2_AESTHEMOS),
+            Mean_Awe = (mean(Awe_1_AESTHEMOS)+mean(Awe_2_AESTHEMOS))/2,
+              PooledSD_Awe = sqrt((sd(Awe_1_AESTHEMOS)^2 + sd(Awe_2_AESTHEMOS)^2)/2)
+            )
+
+EnchantmentDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_SomethingWonderful = mean(Enchantment_1_AESTHEMOS),
+              SD_SomethingWonderful = sd(Enchantment_1_AESTHEMOS),
+            Mean_Enchanted = mean(Enchantment_2_AESTHEMOS),
+              SD_Enchanted = sd(Enchantment_2_AESTHEMOS),
+            Mean_Entchantment = (mean(Enchantment_1_AESTHEMOS)+mean(Enchantment_2_AESTHEMOS))/2,
+              PooledSD_Entchantment = sqrt((sd(Enchantment_1_AESTHEMOS)^2 + sd(Enchantment_2_AESTHEMOS)^2)/2)
+            )
+
+NostalgiaDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Nostalgic = mean(Nostalgia_1_AESTHEMOS),
+              SD_Nostalgic = sd(Nostalgia_1_AESTHEMOS),
+            Mean_Sentimental = mean(Nostalgia_2_AESTHEMOS),
+              SD_Sentimental = sd(Nostalgia_2_AESTHEMOS),
+            Mean_Nostalgia = (mean(Nostalgia_1_AESTHEMOS)+mean(Nostalgia_2_AESTHEMOS))/2,
+              PooledSD_Nostalgia = sqrt((sd(Nostalgia_1_AESTHEMOS)^2 + sd(Nostalgia_2_AESTHEMOS)^2)/2)
+            )
+
+JoyDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Delight = mean(Joy_1_AESTHEMOS),
+              SD_Delight = sd(Joy_1_AESTHEMOS),
+            Mean_Happy = mean(Joy_2_AESTHEMOS),
+              SD_Happy = sd(Joy_2_AESTHEMOS),
+            Mean_Joy = (mean(Joy_1_AESTHEMOS)+mean(Joy_2_AESTHEMOS))/2,
+              PooledSD_Joy = sqrt((sd(Joy_1_AESTHEMOS)^2 + sd(Joy_2_AESTHEMOS)^2)/2)
+            )
+
+HumorDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Amused = mean(Humor_1_AESTHEMOS),
+              SD_Amused = sd(Humor_1_AESTHEMOS),
+            Mean_Funny = mean(Humor_2_AESTHEMOS),
+              SD_Funny = sd(Humor_2_AESTHEMOS),
+            Mean_Humor = (mean(Humor_1_AESTHEMOS)+mean(Humor_2_AESTHEMOS))/2,
+              PooledSD_Humor = sqrt((sd(Humor_1_AESTHEMOS)^2 + sd(Humor_2_AESTHEMOS)^2)/2)
+            )
+
+VitalityDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Spurred = mean(Vitality_1_AESTHEMOS),
+              SD_Spurred = sd(Vitality_1_AESTHEMOS),
+            Mean_Invigorated = mean(Vitality_2_AESTHEMOS),
+              SD_Invigorated = sd(Vitality_2_AESTHEMOS),
+            Mean_Vitality = (mean(Vitality_1_AESTHEMOS)+mean(Vitality_2_AESTHEMOS))/2,
+              PooledSD_Vitality = sqrt((sd(Vitality_1_AESTHEMOS)^2 + sd(Vitality_2_AESTHEMOS)^2)/2)
+            )
+
+EnergyDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Motivated = mean(Energy_1_AESTHEMOS),
+              SD_Motivated = sd(Energy_1_AESTHEMOS),
+            Mean_Energized = mean(Energy_2_AESTHEMOS),
+              SD_Energized = sd(Energy_2_AESTHEMOS),
+            Mean_Energy = (mean(Energy_1_AESTHEMOS)+mean(Energy_2_AESTHEMOS))/2,
+              PooledSD_Energy = sqrt((sd(Energy_1_AESTHEMOS)^2 + sd(Energy_2_AESTHEMOS)^2)/2)
+            )
+
+RelaxationDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Motivated = mean(Relaxation_1_AESTHEMOS),
+              SD_Motivated = sd(Relaxation_1_AESTHEMOS),
+            Mean_Energized = mean(Relaxation_2_AESTHEMOS),
+              SD_Energized = sd(Relaxation_2_AESTHEMOS),
+            Mean_Relaxation = (mean(Relaxation_1_AESTHEMOS)+mean(Relaxation_2_AESTHEMOS))/2,
+              PooledSD_Relaxation = sqrt((sd(Relaxation_1_AESTHEMOS)^2 + sd(Relaxation_2_AESTHEMOS)^2)/2)
+            )
+
+SurpriseDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Baffled = mean(Surprise_1_AESTHEMOS),
+              SD_Baffled = sd(Surprise_1_AESTHEMOS),
+            Mean_SurprisedMe = mean(Surprise_2_AESTHEMOS),
+              SD_SurprisedMe = sd(Surprise_2_AESTHEMOS),
+            Mean_Surprise = (mean(Surprise_1_AESTHEMOS)+mean(Surprise_2_AESTHEMOS))/2,
+              PooledSD_Surprise = sqrt((sd(Surprise_1_AESTHEMOS)^2 + sd(Surprise_2_AESTHEMOS)^2)/2)
+            )
+
+InterestDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Curious = mean(Interest_1_AESTHEMOS),
+              SD_Curious = sd(Interest_1_AESTHEMOS),
+            Mean_SparkedIntererst = mean(Interest_2_AESTHEMOS),
+              SD_SparkedIntererst = sd(Interest_2_AESTHEMOS),
+            Mean_Interest = (mean(Interest_1_AESTHEMOS)+mean(Interest_2_AESTHEMOS))/2,
+              PooledSD_Interest = sqrt((sd(Interest_1_AESTHEMOS)^2 + sd(Interest_2_AESTHEMOS)^2)/2)
+            )
+
+IntellectualChallengeDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Challenged = mean(IntellectualChallenge_1_AESTHEMOS),
+              SD_Challenged = sd(IntellectualChallenge_1_AESTHEMOS),
+            Mean_Engaged = mean(IntellectualChallenge_2_AESTHEMOS),
+              SD_Engaged = sd(IntellectualChallenge_2_AESTHEMOS),
+            Mean_IntellectualChallenge = (mean(IntellectualChallenge_1_AESTHEMOS)+mean(IntellectualChallenge_2_AESTHEMOS))/2,
+              PooledSD_IntellectualChallenge = sqrt((sd(IntellectualChallenge_1_AESTHEMOS)^2 + sd(IntellectualChallenge_2_AESTHEMOS)^2)/2)
+            )
+
+InsightDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_SuddenInsight = mean(Insight_1_AESTHEMOS),
+              SD_SuddenInsight = sd(Insight_1_AESTHEMOS),
+            Mean_DeeperMeaning = mean(Insight_2_AESTHEMOS),
+              SD_DeeperMeaning = sd(Insight_2_AESTHEMOS),
+            Mean_Insight = (mean(Insight_1_AESTHEMOS)+mean(Insight_2_AESTHEMOS))/2,
+              PooledSD_Insight = sqrt((sd(Insight_1_AESTHEMOS)^2 + sd(Insight_2_AESTHEMOS)^2)/2)
+            )
+
+FeelingOfUglinessDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Distasteful = mean(FeelingOfUgliness_1_AESTHEMOS),
+              SD_Distasteful = sd(FeelingOfUgliness_1_AESTHEMOS),
+            Mean_Ugly = mean(FeelingOfUgliness_2_AESTHEMOS),
+              SD_Ugly = sd(FeelingOfUgliness_2_AESTHEMOS),
+            Mean_FeelingOfUgliness = (mean(FeelingOfUgliness_1_AESTHEMOS)+mean(FeelingOfUgliness_2_AESTHEMOS))/2,
+              PooledSD_FeelingOfUgliness = sqrt((sd(FeelingOfUgliness_1_AESTHEMOS)^2 + sd(FeelingOfUgliness_2_AESTHEMOS)^2)/2)
+            )
+
+BoredomDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Indifferent = mean(Boredom_1_AESTHEMOS),
+              SD_Indifferent = sd(Boredom_1_AESTHEMOS),
+            Mean_Bored = mean(Boredom_2_AESTHEMOS),
+              SD_Bored = sd(Boredom_2_AESTHEMOS),
+            Mean_Boredom = (mean(Boredom_1_AESTHEMOS)+mean(Boredom_2_AESTHEMOS))/2,
+              PooledSD_Boredom = sqrt((sd(Boredom_1_AESTHEMOS)^2 + sd(Boredom_2_AESTHEMOS)^2)/2)
+            )
+
+ConfusionDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Confused = mean(Confusion_1_AESTHEMOS),
+              SD_Confused = sd(Confusion_1_AESTHEMOS),
+            Mean_Unsettling = mean(Confusion_2_AESTHEMOS),
+              SD_Unsettling = sd(Confusion_2_AESTHEMOS),
+            Mean_Confusion = (mean(Confusion_1_AESTHEMOS)+mean(Confusion_2_AESTHEMOS))/2,
+              PooledSD_Confusion = sqrt((sd(Confusion_1_AESTHEMOS)^2 + sd(Confusion_2_AESTHEMOS)^2)/2)
+            )
+
+AngerDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Aggressive = mean(Anger_1_AESTHEMOS),
+              SD_Aggressive = sd(Anger_1_AESTHEMOS),
+            Mean_Angry = mean(Anger_2_AESTHEMOS),
+              SD_Angry = sd(Anger_2_AESTHEMOS),
+            Mean_Anger = (mean(Anger_1_AESTHEMOS)+mean(Anger_2_AESTHEMOS))/2,
+              PooledSD_Anger = sqrt((sd(Anger_1_AESTHEMOS)^2 + sd(Anger_2_AESTHEMOS)^2)/2)
+            )
+
+UneasinessDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Worried = mean(Uneasiness_1_AESTHEMOS),
+              SD_Worried = sd(Uneasiness_1_AESTHEMOS),
+            Mean_Oppressive = mean(Uneasiness_2_AESTHEMOS),
+              SD_Oppressive = sd(Uneasiness_2_AESTHEMOS),
+            Mean_Uneasiness = (mean(Uneasiness_1_AESTHEMOS)+mean(Uneasiness_2_AESTHEMOS))/2,
+              PooledSD_Uneasiness = sqrt((sd(Uneasiness_1_AESTHEMOS)^2 + sd(Uneasiness_2_AESTHEMOS)^2)/2)
+            )
+
+SadnessDescript <- AESTHEMOSDescript %>%
+    summarise(Mean_Sad = mean(Sadness_1_AESTHEMOS),
+              SD_Sad = sd(Sadness_1_AESTHEMOS),
+            Mean_Melancholic = mean(Sadness_2_AESTHEMOS),
+              SD_Melancholic = sd(Sadness_2_AESTHEMOS),
+            Mean_Sadness = (mean(Sadness_1_AESTHEMOS)+mean(Sadness_2_AESTHEMOS))/2,
+              PooledSD_Sadness = sqrt((sd(Sadness_1_AESTHEMOS)^2 + sd(Sadness_2_AESTHEMOS)^2)/2)
+            )
+
+DataSetX <- DataSet %>%
+  filter(`GamesAsArt?Y/N` == "Yes") %>%
+  select(ends_with("_AESTHEMOS")) %>%
+  mutate(FeelingOfBeauty = (FeelingOfBeauty_1_AESTHEMOS+FeelingOfBeauty_2_AESTHEMOS)/2) %>%
+  mutate(Fascination = (Fascination_1_AESTHEMOS+Fascination_2_AESTHEMOS)/2) %>%
+  mutate(BeingMoved = (BeingMoved_1_AESTHEMOS+BeingMoved_2_AESTHEMOS)/2) %>%
+  mutate(Awe = (Awe_1_AESTHEMOS+Awe_2_AESTHEMOS)/2) %>%
+  mutate(Enchantment = (Enchantment_1_AESTHEMOS+Enchantment_2_AESTHEMOS)/2) %>%
+  mutate(Nostalgia = (Nostalgia_1_AESTHEMOS+Nostalgia_2_AESTHEMOS)/2) %>%
+  mutate(Joy = (Joy_1_AESTHEMOS+Joy_2_AESTHEMOS)/2) %>%
+  mutate(Humor = (Humor_1_AESTHEMOS+Humor_2_AESTHEMOS)/2) %>%
+  mutate(Vitality = (Vitality_1_AESTHEMOS+Vitality_2_AESTHEMOS)/2) %>%
+  mutate(Energy = (Energy_1_AESTHEMOS+Energy_2_AESTHEMOS)/2) %>%
+  mutate(Relaxation = (Relaxation_1_AESTHEMOS+Relaxation_2_AESTHEMOS)/2) %>%
+  mutate(Surprise = (Surprise_1_AESTHEMOS+Surprise_2_AESTHEMOS)/2) %>%
+  mutate(Interest = (Interest_1_AESTHEMOS+Interest_2_AESTHEMOS)/2) %>%
+  mutate(IntellectualChallenge = (IntellectualChallenge_1_AESTHEMOS+IntellectualChallenge_2_AESTHEMOS)/2) %>%
+  mutate(Insight = (Insight_1_AESTHEMOS+Insight_2_AESTHEMOS)/2) %>%
+  mutate(FeelingOfUgliness = (FeelingOfUgliness_1_AESTHEMOS+FeelingOfUgliness_2_AESTHEMOS)/2) %>%
+  mutate(Boredom = (Boredom_1_AESTHEMOS+Boredom_2_AESTHEMOS)/2) %>%
+  mutate(Confusion = (Confusion_1_AESTHEMOS+Confusion_2_AESTHEMOS)/2) %>%
+  mutate(Anger = (Anger_1_AESTHEMOS+Anger_2_AESTHEMOS)/2) %>%
+  mutate(Uneasiness = (Uneasiness_1_AESTHEMOS+Uneasiness_2_AESTHEMOS)/2) %>%
+  mutate(Sadness = (Sadness_1_AESTHEMOS+Sadness_2_AESTHEMOS)/2)
+  
+```
+Tables for the AESTHEMOS Items:
+
+### 1: Feeling Of Beauty
+`r knitr::kable(FeelingOfBeautyDescript)`
+```{r}
+PI1_1 <-ggplot(DataSetX, aes(x="I Liked It", y=FeelingOfBeauty_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_1 <-ggplot(DataSetX, aes(x="I found it beautiful", y=FeelingOfBeauty_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_1 <- ggplot(DataSetX, aes(x="Feeling Of Beauty", y=FeelingOfBeauty)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_1+PI2_1+PS_1 + 
+  plot_annotation(title = "Feeling of Beauty")
+```
+
+
+### 2: Fascination
+`r knitr::kable(FascinationDescript)`
+```{r}
+PI1_2 <-ggplot(DataSetX, aes(x="I was impressed", y=Fascination_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_2 <-ggplot(DataSetX, aes(x="It fascinated me", y=Fascination_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_2 <- ggplot(DataSetX, aes(x="Fascination", y=Fascination)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_2+PI2_2+PS_2 + 
+  plot_annotation(title = "Fascination")
+```
+
+### 3: Being Moved
+`r knitr::kable(BeingMovedDescript)`
+```{r}
+PI1_3 <-ggplot(DataSetX, aes(x="I felt deeply moved", y=BeingMoved_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_3 <-ggplot(DataSetX, aes(x="It touched me", y=BeingMoved_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_3 <- ggplot(DataSetX, aes(x="Being Moved", y=BeingMoved)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_3+PI2_3+PS_3 + 
+  plot_annotation(title = "Being Moved")
+```
+
+### 4: Awe
+`r knitr::kable(AweDescript)`
+```{r}
+PI1_4 <-ggplot(DataSetX, aes(x="I found it sublime", y=Awe_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_4 <-ggplot(DataSetX, aes(x="I felt Awe", y=Awe_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_4 <- ggplot(DataSetX, aes(x="Awe", y=Awe)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_4+PI2_4+PS_4 + 
+  plot_annotation(title = "Awe")
+```
+
+### 5: Enchantment
+`r knitr::kable(EnchantmentDescript)`
+```{r}
+PI1_5 <-ggplot(DataSetX, aes(x="I felt something wonderful", y=Enchantment_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_5 <-ggplot(DataSetX, aes(x="I was enchanted", y=Enchantment_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_5 <- ggplot(DataSetX, aes(x="Enchantment", y=Enchantment)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_5+PI2_5+PS_5 + 
+  plot_annotation(title = "Enchantment")
+```
+
+### 6: Nostalgia
+`r knitr::kable(NostalgiaDescript)`
+```{r}
+PI1_6 <-ggplot(DataSetX, aes(x="It made me feel nostalgic", y=Nostalgia_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_6 <-ggplot(DataSetX, aes(x="It made me feel sentimental", y=Nostalgia_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_6 <- ggplot(DataSetX, aes(x="Nostalgia", y=Nostalgia)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_6+PI2_6+PS_6 + 
+  plot_annotation(title = "Nostalgia")
+```
+
+### 7: Joy
+`r knitr::kable(JoyDescript)`
+```{r}
+PI1_7 <-ggplot(DataSetX, aes(x="It delighted me", y=Joy_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_7 <-ggplot(DataSetX, aes(x="It made me happy", y=Joy_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_7 <- ggplot(DataSetX, aes(x="Joy", y=Joy)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_7+PI2_7+PS_7 + 
+  plot_annotation(title = "Joy")
+```
+
+### 8: Humor
+`r knitr::kable(HumorDescript)`
+```{r}
+PI1_8 <-ggplot(DataSetX, aes(x="It amused me", y=Humor_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_8 <-ggplot(DataSetX, aes(x="It was funny to me", y=Humor_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_8 <- ggplot(DataSetX, aes(x="Humor", y=Humor)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_8+PI2_8+PS_8 + 
+  plot_annotation(title = "Humor")
+```
+
+### 9: Vitality
+`r knitr::kable(VitalityDescript)`
+```{r}
+PI1_9 <-ggplot(DataSetX, aes(x="It spurred me on", y=Vitality_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_9 <-ggplot(DataSetX, aes(x="It invigorated me", y=Vitality_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_9 <- ggplot(DataSetX, aes(x="Vitality", y=Vitality)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_9+PI2_9+PS_9 + 
+  plot_annotation(title = "Vitality")
+```
+
+### 10: Energy
+`r knitr::kable(EnergyDescript)`
+```{r}
+PI1_10 <-ggplot(DataSetX, aes(x="It motivated me to act", y=Energy_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_10 <-ggplot(DataSetX, aes(x="It energized me", y=Energy_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_10 <- ggplot(DataSetX, aes(x="Energy", y=Energy)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_10+PI2_10+PS_10 + 
+  plot_annotation(title = "Energy")
+```
+
+### 11: Relaxation
+`r knitr::kable(RelaxationDescript)`
+```{r}
+PI1_11 <-ggplot(DataSetX, aes(x="It calmed me", y=Relaxation_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_11 <-ggplot(DataSetX, aes(x="It relaxed me", y=Relaxation_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_11 <- ggplot(DataSetX, aes(x="Relaxation", y=Relaxation)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_11+PI2_11+PS_11 + 
+  plot_annotation(title = "Relaxation")
+```
+
+### 12: Surprise
+`r knitr::kable(SurpriseDescript)`
+```{r}
+PI1_12 <-ggplot(DataSetX, aes(x="It baffled me", y=Surprise_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_12 <-ggplot(DataSetX, aes(x="It surprised me", y=Surprise_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_12 <- ggplot(DataSetX, aes(x="Surprise", y=Surprise)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_12+PI2_12+PS_12 + 
+  plot_annotation(title = "Surprise")
+```
+
+### 13: Interest
+`r knitr::kable(InterestDescript)`
+```{r}
+PI1_13 <-ggplot(DataSetX, aes(x="Made me Curious", y=Interest_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_13 <-ggplot(DataSetX, aes(x="Sparked my Interest", y=Interest_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_13 <- ggplot(DataSetX, aes(x="Interest", y=Interest)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_13+PI2_13+PS_13 + 
+  plot_annotation(title = "Interest")
+```
+
+### 14: Intellectual Challenge
+`r knitr::kable(IntellectualChallengeDescript)`
+```{r}
+PI1_14 <-ggplot(DataSetX, aes(x="It Challenged me intellectually", y=IntellectualChallenge_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_14 <-ggplot(DataSetX, aes(x="Was mentally enganged", y=IntellectualChallenge_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_14 <- ggplot(DataSetX, aes(x="Intellectual Challenge", y=IntellectualChallenge)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_14+PI2_14+PS_14 + 
+  plot_annotation(title = "Intellectual Challenge")
+```
+
+### 15: Insight
+`r knitr::kable(InsightDescript)`
+```{r}
+PI1_15 <-ggplot(DataSetX, aes(x="I felt a sudden insight", y=Insight_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_15 <-ggplot(DataSetX, aes(x="I sensed a deeper meaning", y=Insight_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_15 <- ggplot(DataSetX, aes(x="Insight", y=Insight)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_15+PI2_15+PS_15 + 
+  plot_annotation(title = "Insight")
+```
+
+### 16: Feeling of Ugliness
+`r knitr::kable(FeelingOfUglinessDescript)`
+```{r}
+PI1_16 <-ggplot(DataSetX, aes(x="I found it distasteful", y=FeelingOfUgliness_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_16 <-ggplot(DataSetX, aes(x="I found it ugly", y=FeelingOfUgliness_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_16 <- ggplot(DataSetX, aes(x="Feeling Of Ugliness", y=FeelingOfUgliness)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_16+PI2_16+PS_16 + 
+  plot_annotation(title = "Feeling Of Ugliness")
+```
+
+### 16: Boredom
+`r knitr::kable(BoredomDescript)`
+```{r}
+PI1_16 <-ggplot(DataSetX, aes(x="I felt indifferent", y=Boredom_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_16 <-ggplot(DataSetX, aes(x="It bored me", y=Boredom_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_16 <- ggplot(DataSetX, aes(x="Boredom", y=Boredom)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_16+PI2_16+PS_16 + 
+  plot_annotation(title = "Boredom")
+```
+
+### 18: Confusion
+`r knitr::kable(ConfusionDescript)`
+```{r}
+PI1_18 <-ggplot(DataSetX, aes(x="I felt confused", y=Confusion_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_18 <-ggplot(DataSetX, aes(x="It Was unsettling to me", y=Confusion_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_18 <- ggplot(DataSetX, aes(x="Confusion", y=Confusion)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_18+PI2_18+PS_18 + 
+  plot_annotation(title = "Confusion")
+```
+
+
+### 19: Anger
+`r knitr::kable(AngerDescript)`
+```{r}
+PI1_19 <-ggplot(DataSetX, aes(x="It made me aggressive", y=Anger_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_19 <-ggplot(DataSetX, aes(x="It made me angry", y=Anger_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_19 <- ggplot(DataSetX, aes(x="Anger", y=Anger)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_19+PI2_19+PS_19 + 
+  plot_annotation(title = "Anger")
+```
+
+### 20: Uneasiness
+`r knitr::kable(UneasinessDescript)`
+```{r}
+PI1_20 <-ggplot(DataSetX, aes(x="It worried me", y=Uneasiness_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_20 <-ggplot(DataSetX, aes(x="Felt oppressive", y=Uneasiness_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_20 <- ggplot(DataSetX, aes(x="Uneasiness", y=Uneasiness)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_20+PI2_20+PS_20 + 
+  plot_annotation(title = "Uneasiness")
+```
+
+### 21: Sadness
+`r knitr::kable(SadnessDescript)`
+```{r}
+PI1_21 <-ggplot(DataSetX, aes(x="It made me sad", y=Sadness_1_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PI2_21 <-ggplot(DataSetX, aes(x="It made me feel melancholic", y=Sadness_2_AESTHEMOS)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+
+PS_21 <- ggplot(DataSetX, aes(x="Sadness", y=Sadness)) +
+  geom_violin() +
+  geom_boxplot(width=0.1)+
+  ylab(NULL) +
+  xlab(NULL)
+  
+PI1_21+PI2_21+PS_21 + 
+  plot_annotation(title = "Sadness")
+```
+
+
+## Scale Reliablity
+```{r  echo=FALSE}
+Subscales <- c("Feeling of beauty", "Fascination","Being moved", "Awe", "Enchantment", "Nostalgia", "Joy", "Humor", "Vitality", "Energy", "Relaxation", "Surprise", "Interest", "Intellectual challenge", "Insight", "FeelingOfUgliness", "Boredom", "Confusion", "Anger", "Uneasiness", "Sadness")
+#Correlations in the Original Aesthemos (10.1371/journal.pone.0178899)
+AESTHEMOSCronbachAlpha <- c(.73, .77, .77, .55, .79, .73, .84, .85, .80, .66, .6, .75, .69, .78, .64, .71, .75, .75, .75, .75, .73)
+#--Creating a DataSets per Subscale
+FeelingOfBeauty <- DataSet %>%
+  select(FeelingOfBeauty_1_AESTHEMOS, FeelingOfBeauty_2_AESTHEMOS)
+Fascination <- DataSet %>%
+  select(Fascination_1_AESTHEMOS, Fascination_2_AESTHEMOS)
+BeingMoved <- DataSet %>%
+  select(BeingMoved_1_AESTHEMOS,BeingMoved_2_AESTHEMOS)
+Awe <- DataSet %>%
+  select(Awe_1_AESTHEMOS,Awe_2_AESTHEMOS)
+Enchantment <- DataSet %>%
+  select(Enchantment_1_AESTHEMOS, Enchantment_2_AESTHEMOS)
+Nostalgia <- DataSet %>%
+  select(Nostalgia_1_AESTHEMOS, Nostalgia_2_AESTHEMOS)
+Joy <- DataSet %>%
+  select(Joy_1_AESTHEMOS, Joy_2_AESTHEMOS)
+Humor <- DataSet %>%
+  select(Humor_1_AESTHEMOS,Humor_2_AESTHEMOS)
+Vitality <- DataSet %>%
+  select(Vitality_1_AESTHEMOS, Vitality_2_AESTHEMOS)
+Energy <- DataSet %>%
+  select(Energy_1_AESTHEMOS, Energy_2_AESTHEMOS)
+Relaxation <- DataSet %>%
+  select(Relaxation_1_AESTHEMOS, Relaxation_2_AESTHEMOS)
+Surprise <- DataSet %>%
+  select(Surprise_1_AESTHEMOS, Surprise_2_AESTHEMOS)
+Interest <- DataSet %>%
+  select(Interest_1_AESTHEMOS, Interest_2_AESTHEMOS)
+IntellectualChallenge <- DataSet %>%
+  select(IntellectualChallenge_1_AESTHEMOS, IntellectualChallenge_2_AESTHEMOS)
+Insight <- DataSet %>%
+  select(Insight_1_AESTHEMOS, Insight_2_AESTHEMOS)
+FeelingOfUgliness <- DataSet %>%
+  select(FeelingOfUgliness_1_AESTHEMOS, FeelingOfUgliness_2_AESTHEMOS)
+Boredom <- DataSet %>%
+  select(Boredom_1_AESTHEMOS, Boredom_2_AESTHEMOS)
+Confusion <- DataSet %>%
+  select(Confusion_1_AESTHEMOS, Confusion_2_AESTHEMOS)
+Anger <- DataSet %>%
+  select(Anger_1_AESTHEMOS, Anger_2_AESTHEMOS)
+Uneasiness <- DataSet %>%
+  select(Uneasiness_1_AESTHEMOS, Uneasiness_2_AESTHEMOS)
+Sadness <- DataSet %>%
+  select(Sadness_1_AESTHEMOS, Sadness_2_AESTHEMOS)
+
+
+#--Computing Cronbach
+MeasuredCronbach <- c(cronbach(FeelingOfBeauty)$alpha, 
+                      cronbach(Fascination)$alpha, 
+                      cronbach(BeingMoved)$alpha, 
+                      cronbach(Awe)$alpha, 
+                      cronbach(Enchantment)$alpha,
+                      cronbach(Nostalgia)$alpha,
+                      cronbach(Joy)$alpha,
+                      cronbach(Humor)$alpha,
+                      cronbach(Vitality)$alpha,
+                      cronbach(Energy)$alpha,
+                      cronbach(Relaxation)$alpha,
+                      cronbach(Surprise)$alpha,
+                      cronbach(Interest)$alpha,
+                      cronbach(IntellectualChallenge)$alpha,
+                      cronbach(Insight)$alpha,
+                      cronbach(FeelingOfUgliness)$alpha,
+                      cronbach(Boredom)$alpha,
+                      cronbach(Confusion)$alpha,
+                      cronbach(Anger)$alpha,
+                      cronbach(Uneasiness)$alpha,
+                      cronbach(Sadness)$alpha)
+
+CronbachDF <- data.frame("Subscale" = Subscales, "MeasuredCronbach" = MeasuredCronbach, "AESTHEMOSCronbach" = AESTHEMOSCronbachAlpha)
+
+CronbachDF <- CronbachDF %>%
+  mutate(MeasuredCronbach = round(MeasuredCronbach, 2)) %>%
+  mutate(Difference = MeasuredCronbach-AESTHEMOSCronbach) %>%
+  arrange(MeasuredCronbach)
+```
+
+We computed Cronbach's \alpha and compared it to the reliability reported by Schindler et al. (2017)
+
+`r knitr::kable(CronbachDF)`
+
+
+
+# Expertise and AESTHEMOS
+
+
+# Exploring Expertise
+
+Expertise was measured via several measures:
+- For how long have they been playing (in Years)
+- how many hours do they play per week
+- Self reported Experience (0-100)
+- Self reported broadness of taste (0-100)
+- A selection of Genres people prefer
+
+
+```{r}
+
+#Create a tally of checked Genres:
+DataSet <- DataSet %>%
+  mutate_at(vars(starts_with("Genres")), as.factor)
+
+DataSet$CountYes <- rowSums(DataSet[68:81] == "Yes")
+
+
+
+DataSet %>%
+  summarise(TimeInYears_mean = mean(`Years. For_how_many_ye.._`),
+              TimeInYears_SD = sd(`Years. For_how_many_ye.._`),
+            TimePerWeek_mean = mean(`HoursPerWeek. How_many_hours_.._`),
+              TimePerWeek_SD = sd(`HoursPerWeek. How_many_hours_.._`),
+            SelfReportedExperience_mean = mean(`ExperienceGeneral[SQ001]. Please_rate_the..__[I_am_experience.._]`, na.rm=TRUE),
+              SelfReportedExperience_SD = sd(`ExperienceGeneral[SQ001]. Please_rate_the..__[I_am_experience.._]`, na.rm=TRUE),
+            SelfReportedBroadnessOfTaste_mean = mean(`ExperienceGeneral[SQ003]. Please_rate_the..__[As_how_broad_wo.._]`, na.rm=TRUE),
+              SelfReportedBroadnessOfTaste = sd(`ExperienceGeneral[SQ003]. Please_rate_the..__[As_how_broad_wo.._]`, na.rm=TRUE),
+            EnjoyedGenres_mean = mean(CountYes),
+              EnjoyedGenres_SD = sd(CountYes)
+            )
+
+
+```
+
+Expertise was measured directly via two continuous self report measures:
+- Experience
+- Broadness of Taste
+
+```{r}
+ggplot(DataSet, aes(DataSet$`ExperienceGeneral[SQ001]. Please_rate_the..__[I_am_experience.._]`, DataSet$`ExperienceGeneral[SQ003]. Please_rate_the..__[As_how_broad_wo.._]`)) +
+  geom_point() + 
+  geom_smooth(method='lm', formula = y~x) + 
+  xlab("Experience") + 
+  ylab("Broadness Of Taste")
+
+corExperience <- cor(DataSet$`ExperienceGeneral[SQ001]. Please_rate_the..__[I_am_experience.._]`, DataSet$`ExperienceGeneral[SQ003]. Please_rate_the..__[As_how_broad_wo.._]`, use = "complete.obs")
+```
+These two measures had a medium correlation (*r =* `r corExperience`). Ths indicates, that a higher experience might come with a broadened taste.
+
+Additionally participants indicated the time since they started playing
+```{r}
+ggplot(DataSet, aes(DataSet$`ExperienceGeneral[SQ001]. Please_rate_the..__[I_am_experience.._]`, DataSet$`Years. For_how_many_ye.._`)) +
+  geom_point() + 
+  geom_smooth(method='lm', formula = y~x) + 
+  xlab("Experience") + 
+  ylab("Years")
+
+corTime <- cor(DataSet$`Years. For_how_many_ye.._`, DataSet$`ExperienceGeneral[SQ001]. Please_rate_the..__[I_am_experience.._]`, use = "complete.obs")
+```
+
+The measures had a medium correlation (*r =* `r corTime`)
+
+
+```{r}
+ggplot(DataSet, aes(DataSet$`ExperienceGeneral[SQ003]. Please_rate_the..__[As_how_broad_wo.._]`, DataSet$CountYes)) +
+  geom_point() + 
+  geom_smooth(method='lm', formula = y~x) + 
+  xlab("Broadness of Taste") + 
+  ylab("Enjoyed Genres")
+
+corBroad <- cor(DataSet$`ExperienceGeneral[SQ003]. Please_rate_the..__[As_how_broad_wo.._]`, DataSet$CountYes, use = "complete.obs")
+```
+
+As expected, the self report of broadness of taste correlates highly with the enjyoed genres (*r = *`r corBroad`).
+
+
+
+Further, participants indicated if they worked in the gaming industry or worked as Artists:
+```{r}
+CountVGExperts <- DataSet %>%
+  group_by(`OccupationVG. Do_you_currentl.._`) %>%
+  count(`OccupationVG. Do_you_currentl.._`) 
+CountArtExperts <- DataSet %>%
+  count(`OccupationArt. Do_you_currentl.._`)
+
+ArtAndVGExperts <- DataSet %>%
+  filter(`OccupationVG. Do_you_currentl.._` == "Yes" & `OccupationArt. Do_you_currentl.._` == "Yes")
+```
+
+Of the 174 participants, `r CountVGExperts[2,2]` worked on or with video games and `r CountArtExperts[2,2]` worked on or with art. `r nrow(ArtAndVGExperts)` participants described themselves as working or having worked in both fields. Interestingly, one participants (ID620) works in both fields while stating to not have had an artistic experience. However, this might not be due to an absence of an artistic experience but due to the participants rejection of the "[...] Art, as it's commonly understood and applied in general discourse [...]".
+
+```{r}
+p1 <- ggplot(DataSet, aes(DataSet$`OccupationArt. Do_you_currentl.._`, DataSet$`ExperienceGeneral[SQ001]. Please_rate_the..__[I_am_experience.._]`)) +
+  geom_violin() +
+  geom_boxplot(width=0.1) +
+  xlab("Working with/on video games") +
+  ylab("Experience")
+p2 <- ggplot(DataSet, aes(DataSet$`OccupationArt. Do_you_currentl.._`, DataSet$`ExperienceGeneral[SQ003]. Please_rate_the..__[As_how_broad_wo.._]`)) +
+  geom_violin() +
+  geom_boxplot(width=0.1) +
+  xlab("Working with/on video games") + 
+  ylab("Broadness of Taste")
+
+p1+p2
+```
+
+While people working with videogames barely differentiate themselves from the other participants, they report a slightly broader taste. However, given the vast different in sample size, this should be taken with a grain of salt.
+
+
+
+
+
+
+
+
+
+

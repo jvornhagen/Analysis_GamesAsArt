@@ -114,3 +114,10 @@ DataSet_Qualitative <- DataSet_Cleaned %>%
 write.csv(DataSet_Qualitative, file = "../MainAnalyses/QualitativeAnalysis/QualitativeAnalysis_DataFile.csv")
 ```
 
+##_Save a clean DataSet for Descriptive Analyses__#
+```{r}
+DataSet_Descriptive <- DataSet_Cleaned;
+
+##Save DataSet as CSV in Folder
+write.csv(DataSet_Descriptive, file = "../MainAnalyses/DescriptiveAnalysis/DescriptiveAnalysis_DataFile.csv")
+```
