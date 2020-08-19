@@ -1240,7 +1240,7 @@ We computed Cronbach's \alpha and compared it to the reliability reported by Sch
 
 
 
-# Expertise and AESTHEMOS
+
 
 
 # Exploring Expertise

@@ -1,0 +1,95 @@
+---
+title: "Analysis: Themes and Expertise"
+author: "Anonymous"
+date: "13 8 2020"
+output: 
+  html_document:
+    theme: sandstone
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=TRUE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+This doc gives some exploratory insight into the DataSet
+
+
+```{r  include=FALSE}
+
+# Setup: Always Run!
+# This gets all packages and the file.
+
+if(!require(tidyverse)){install.packages('tidyverse')}
+if(!require(readxl)){install.packages('readxl')}
+if(!require(summarytools)){install.packages('summarytools')}
+if(!require(patchwork)){install.packages('patchwork')}
+library(tidyverse, summarytools, patchwork)
+library(readxl)
+##Set Working DIR so Input&Output is correct
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+```
+
+
+
+```{r}
+#Import Data Sets
+##Note: This requires the complete Analysis Folder
+
+#Get Thmese
+Themes_DF <- read_xlsx("Themes-Expertise.xlsx")
+
+#Get Expertise Measures
+DataSet <- read.csv("../../../DescriptiveAnalysis/DescriptiveAnalysis_DataFile.csv")
+Expertise_DF <- DataSet %>%
+  select(`id..Response_ID`,
+         `Years..For_how_many_ye.._`, `HoursPerWeek..How_many_hours_.._`,
+           `ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._.`, `ExperienceGeneral.SQ003...Please_rate_the..__.As_how_broad_wo.._.`, 
+         `OccupationVG..Do_you_currentl.._`, `OccupationArt..Do_you_currentl.._`)
+
+ThemesExpertise_DF <- full_join(Themes_DF, Expertise_DF, by ="id..Response_ID")
+```
+
+
+# Did Experts name more topics:
+```{r}
+#Create Count:
+ThemesExpertise_DF <- ThemesExpertise_DF %>%
+  mutate(Count_Themes = `The Feels`+`Expressive potential of games`+craft+`exploration of interpretation`+`the thinks`+`visual beauty`+`all games art`)
+
+ggplot(ThemesExpertise_DF, aes(ThemesExpertise_DF$OccupationVG..Do_you_currentl.._, ThemesExpertise_DF$Count_Themes)) +
+  geom_violin() +
+  geom_boxplot(width=0.1) +
+  xlab("Expert") + 
+  ylab("Themes Mentioned")
+  
+
+```
+
+# Which Themes were mentioned how often by which group?
+```{r}
+
+d <- ThemesExpertise_DF %>%
+  select(15, 3:9) %>%
+  pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
+  group_by(`OccupationArt..Do_you_currentl.._`, `Theme`) %>%
+  summarize(total = sum(`Sum`))
+
+d <- d %>%
+  mutate(percent = ifelse(`OccupationArt..Do_you_currentl.._` == "Yes", 
+                   `total`*100/nrow(ThemesExpertise_DF %>% filter(`OccupationVG..Do_you_currentl.._` == "Yes")), 
+                   `total`*100/nrow(ThemesExpertise_DF %>% filter(`OccupationVG..Do_you_currentl.._` == "No"))))
+
+
+
+ggplot(d, aes(`Theme`, percent, fill = `OccupationArt..Do_you_currentl.._`)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(name="Expert", values=c("#dd4613","#A71C49")) +
+  ylim(0, 100) +
+  coord_flip()
+  
+
+```
+
