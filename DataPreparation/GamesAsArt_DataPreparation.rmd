@@ -76,6 +76,14 @@ DataSet_Cleaned <- DataSet_RM %>%
   select(!`Success. Thank_you_very_.._`)
 ```
 
+#__Fixing <2 months ago was saved as N/A by LimeSurvey__#
+```{r}
+#As this question was mandatory, each participant who has seen this question, must have chosen an answer. If they had not answered this question, the other questions on this page have to be NA to. As these were deemed incomplete, they were not exported into the raw data file. Therefore we can be sure, that if participants indicated they experienced games as art (`GamesAsArt?Y/N` == "Yes") and LongAgo is Na(is.na(DataSet_Cleaned$`LongAgo. How_long_ago_di.._`)) the particpants chose "<2 months ago"!
+DataSet_Cleaned$`LongAgo. How_long_ago_di.._`[DataSet_Cleaned$`GamesAsArt?Y/N` == "Yes" & is.na(DataSet_Cleaned$`LongAgo. How_long_ago_di.._`)] <- "<2 months ago"
+```
+
+
+
 ##__Creating Network Analysis DataSet__##
 ```{r}
 ##Extract all the relevant Columns for the network analysis

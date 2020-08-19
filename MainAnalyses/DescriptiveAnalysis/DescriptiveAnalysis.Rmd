@@ -11,13 +11,13 @@ editor_options:
 
 
 ```{r setup, include=TRUE, echo=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
 
 This doc gives some exploratory insight into the DataSet
 
 
-```{r  eval=TRUE, include=FALSE}
+```{r  include=FALSE}
 
 # Setup: Always Run!
 # This gets all packages and the file.
@@ -96,12 +96,311 @@ d1+d2 +
 ```
 
 
+# The Experience of Videogames as Art.
+```{r}
+#Separate DataSet into Yes to VGasArt as Art and NoVGasArt
+
+VGasArt <- DataSet %>%
+  filter(`GamesAsArt?Y/N` == "Yes")
+
+NoVGasArt <- DataSet %>%
+  filter(`GamesAsArt?Y/N` == "No")
+
+DidNotCompleteBonus <- VGasArt %>% 
+  filter(`EffectOnGameYN. Did_this_experi.._` == "N/A" & `BonusQYN. Thank_you_very_.._` == "Yes")
+
+```
+
+Of the `r nrow(DataSet)` participants, `r nrow(VGasArt)` indicated they experienced games as art.
+
+We asked the participants who indicated that they had an experience where they considered games as art to describe this experience and to explain why they consider this experience to be art. We further offered them to answer a set of bonus questions. Of the `r nrow(VGasArt)` participants, `r  sum(str_count(VGasArt$"BonusQYN. Thank_you_very_.._", "Yes"))` agreed to do so (Though `r nrow(DidNotCompleteBonus)` participants did not follow through). These bonus questions asked, what the participants think the meaning of the experience was, how this specific experience changed their opinion on the game, how it effected their personal life, how the experience changed their opinion of the medium, and if they thought their experience was intended by the developers.
+
+```{r}
+freqPerspectiveChanges <- VGasArt %>%
+  summarise("Changed Perspective on Game: (out of 150)" = sum(str_count(VGasArt$`EffectOnGameYN. Did_this_experi.._`, "Yes")),
+            "Changed Perspective on Self: (out of 150)" = sum(str_count(VGasArt$`EffectPersonalYN. Did_this_experi.._`, "Yes")),
+            "Changed Perspective on Medium: (out of 150)" = sum(str_count(VGasArt$`EffectOnMediumYN. Did_this_experi.._`, "Yes")),
+            "Experience was the Developers Intention (out of 150)" = sum(str_count(VGasArt$`IntentionYN. Do_you_think_yo.._`, "Yes"))     
+            )
+```
+`r knitr::kable(freqPerspectiveChanges)`
+It should be noted, that many participants who indicated that the experience did not change their opinion on the medium stated that they already saw games as a form of art (e.g., ID 8, 12, 67, 87, 116). This may indicate, that at least among video game players, the discussion that games are art is not really held anymore.
+
+We further asked participants to state up to five of their favorite games. We compared these to the game they described as an artful experience.
+```{r error=TRUE, class.error = "hide"}
+
+FavouriteGames_DF <- DataSet %>%
+  filter(!is.na(GameTitle)) %>%
+  select(`id. Response_ID`, GameTitle, `FavGames[Fav1]. Please_name_up_..__[1]`, `FavGames[Fav2]. Please_name_up_..__[2]`, `FavGames[Fav3]. Please_name_up_..__[3]`, `FavGames[Fav4]. Please_name_up_..__[4]`, `FavGames[Fav5]. Please_name_up_..__[5]`) %>%
+  rename(FavGame1 = `FavGames[Fav1]. Please_name_up_..__[1]`) %>%
+  rename(FavGame2 = `FavGames[Fav2]. Please_name_up_..__[2]`) %>%
+  rename(FavGame3 = `FavGames[Fav3]. Please_name_up_..__[3]`) %>%
+  rename(FavGame4 = `FavGames[Fav4]. Please_name_up_..__[4]`) %>%
+  rename(FavGame5 = `FavGames[Fav5]. Please_name_up_..__[5]`)
+
+#Making the strings comparable
+FavouriteGames_DF <- FavouriteGames_DF %>%
+  #Capitalizing all strings
+  mutate_if(is.character, str_to_upper) %>%
+  #Trim
+  mutate_if(is.character, str_trim)
+  
+
+
+#Manual changes to get all names equal
+##Remove single Typos/occurances
+FavouriteGames_DF[2,2] = "THIS WAR OF MINE"
+FavouriteGames_DF[29,3] = "BORDERLANDS 2"
+FavouriteGames_DF[57,2] = "BROTHERS: A TALE OF TWO SONS"
+FavouriteGames_DF[57,3] = "BROTHERS: A TALE OF TWO SONS"
+FavouriteGames_DF[118,4] = "DETROIT: BECOME HUMAN"
+FavouriteGames_DF[123,6] = "DEAD SPACE 1"
+FavouriteGames_DF[65,5] = "DISHONORED 2"
+FavouriteGames_DF[20,6] = "DISHONORED"
+FavouriteGames_DF[33,3] = "Dragon Age: ORIGINS"
+FavouriteGames_DF[40,4] = "Dragon Age: ORIGINS"
+FavouriteGames_DF[43,4] = "Dragon Age (SERIES)"
+FavouriteGames_DF[99,5] = "UNCHARTED SERIES"
+FavouriteGames_DF[160,2] = "VAMPIRE: THE MASQUERADE - BLOODLINES"
+FavouriteGames_DF[160,3] = "VAMPIRE: THE MASQUERADE - BLOODLINES"
+FavouriteGames_DF[7,4] = "CRUSADER KINGS II"
+FavouriteGames_DF[9,6] = "DAY OF THE TENTACLE"
+FavouriteGames_DF[125,7] = "FINAL FANTASY 7"
+FavouriteGames_DF[110,2] = "FIRE EMBLEM: THREE HOUSES"
+FavouriteGames_DF[110,3] = "FIRE EMBLEM: THREE HOUSES"
+FavouriteGames_DF[4,4] = "HALF-LIFE 2"
+FavouriteGames_DF[31,4] = "HALO 1"
+FavouriteGames_DF[163,2] = "HORIZON ZERO DAWN"
+FavouriteGames_DF[163,4] = "HORIZON ZERO DAWN"
+FavouriteGames_DF[16,2] = "KNIGHTS OF THE OLD REPUBLIC 2"
+FavouriteGames_DF[99,6] = "LIFE IS STRANGE"
+FavouriteGames_DF[90,4] = "NIGHT IN THE WOODS"
+FavouriteGames_DF[18,6] = "PHOENIX WRIGHT: ACE ATTORNEY"
+FavouriteGames_DF[118,5] = "THE LAST OF US PART 1 AND 2"
+
+##Unify all mentions of Skyrim)
+SkyrimPattern <- c("SKYRIM", "THE ELDER SCROLLS V: SKYRIM", "ELDER SCROLLS SKYRIM", "ELDER SCROLLS V SKYRIM", "SKYRIM (BETHESDA 2011)", "SKYRIM (MODDED)", "THE ELDERSCROLLS V: SKYRIM")
+SkyrimReplacement <- "THE ELDER SCROLLS 5: SKYRIM"
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% SkyrimPattern, ]$GameTitle <- SkyrimReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% SkyrimPattern, ]$FavGame1 <- SkyrimReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% SkyrimPattern, ]$FavGame2 <- SkyrimReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% SkyrimPattern, ]$FavGame3 <- SkyrimReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% SkyrimPattern, ]$FavGame4 <- SkyrimReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% SkyrimPattern, ]$FavGame5 <- SkyrimReplacement
+
+##Unify all mentions of MORROWIND)
+MorrowindPattern <- c("MORROWIND", "MORROWIND.", "THE ELDER SCROLLS MORROWIND")
+MorrowindReplacement <- "THE ELDER SCROLLS 3: MORROWIND"
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% MorrowindPattern, ]$GameTitle <- SkyrimReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% MorrowindPattern, ]$FavGame1 <- SkyrimReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% MorrowindPattern, ]$FavGame2 <- SkyrimReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% MorrowindPattern, ]$FavGame3 <- SkyrimReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% MorrowindPattern, ]$FavGame4 <- SkyrimReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% MorrowindPattern, ]$FavGame5 <- SkyrimReplacement
+
+##Unify all mentions of Breath of the Wild)
+BOTWPattern <- c("ZELDA: BREATH OF THE WILD", "LEGEND OF ZELDA: BREATH OF THE WILD", "ZELDA BOTW", "BREATH OF THE WILD", "ZELDA BREATH OF THE WILD",  "ZELDA: BREATH OF THE WILD", "BOTW", "TLOZ: BREATH OF THE WILD", "LEGEND OF ZELDA, BREATH OF THE WILD", "BREATH OF THE WILD.", "THE LEGEND OF ZELDA BREATH OF THE WILD")
+BOTWReplacement <- "THE LEGEND OF ZELDA: BREATH OF THE WILD"
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% BOTWPattern, ]$GameTitle <- BOTWReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% BOTWPattern, ]$FavGame1 <- BOTWReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% BOTWPattern, ]$FavGame2 <- BOTWReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% BOTWPattern, ]$FavGame3 <- BOTWReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% BOTWPattern, ]$FavGame4 <- BOTWReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% BOTWPattern, ]$FavGame5 <- BOTWReplacement
+
+##Unify all mentions of Majora's Mask)
+MajoraPattern <- c("LEGEND OF ZELDA: MAJORA'S MASK", "THE LEGEND OF ZELDA: MAJORA<U+0092>S MASK", "ZELDA MAJORAS MASK")
+MajoraReplacement <- "THE LEGEND OF ZELDA: MAJORA'S MASK"
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% MajoraPattern, ]$GameTitle <- MajoraReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% MajoraPattern, ]$FavGame1 <- MajoraReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% MajoraPattern, ]$FavGame2 <- MajoraReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% MajoraPattern, ]$FavGame3 <- MajoraReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% MajoraPattern, ]$FavGame4 <- MajoraReplacement
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% MajoraPattern, ]$FavGame5 <- MajoraReplacement
+
+#WOW to WORLD OF WARCRAFT
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% "WOW", ]$GameTitle <- "WORLD OF WARCRAFT"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% "WOW", ]$FavGame1 <- "WORLD OF WARCRAFT"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% "WOW", ]$FavGame2 <- "WORLD OF WARCRAFT"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% "WOW", ]$FavGame3 <- "WORLD OF WARCRAFT"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% "WOW", ]$FavGame4 <- "WORLD OF WARCRAFT"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% "WOW", ]$FavGame5 <- "WORLD OF WARCRAFT"
+
+#Super Smash Brothers
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% "Super Smash Bros. Ultimate", ]$GameTitle <- "Super Smash Brothers Ultimate"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% "Super Smash Bros. Ultimate", ]$FavGame1 <- "Super Smash Brothers Ultimate"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% "Super Smash Bros. Ultimate", ]$FavGame2 <- "Super Smash Brothers Ultimate"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% "Super Smash Bros. Ultimate", ]$FavGame3 <- "Super Smash Brothers Ultimate"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% "Super Smash Bros. Ultimate", ]$FavGame4 <- "Super Smash Brothers Ultimate"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% "Super Smash Bros. Ultimate", ]$FavGame5 <- "Super Smash Brothers Ultimate"
+
+#Animal Crossing
+AnimalCrossingPattern <- c("ANIMAL CROSSING NEW HORIZONS, ANIMAL CROSSING (NEW HORIZONS AND GAMECUBE)")
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% AnimalCrossingPattern, ]$GameTitle <- "ANIMAL CROSSING: NEW HORIZONS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% AnimalCrossingPattern, ]$FavGame1 <- "ANIMAL CROSSING: NEW HORIZONS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% AnimalCrossingPattern, ]$FavGame2 <- "ANIMAL CROSSING: NEW HORIZONS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% AnimalCrossingPattern, ]$FavGame3 <- "ANIMAL CROSSING: NEW HORIZONS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% AnimalCrossingPattern, ]$FavGame4 <- "ANIMAL CROSSING: NEW HORIZONS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% AnimalCrossingPattern, ]$FavGame5 <- "ANIMAL CROSSING: NEW HORIZONS"
+
+#Civ 6
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% "CIVILIZATION VI", ]$GameTitle <- "CIVILIZATION 6"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% "CIVILIZATION VI", ]$FavGame1 <- "CIVILIZATION 6"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% "CIVILIZATION VI", ]$FavGame2 <- "CIVILIZATION 6"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% "CIVILIZATION VI", ]$FavGame3 <- "CIVILIZATION 6"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% "CIVILIZATION VI", ]$FavGame4 <- "CIVILIZATION 6"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% "CIVILIZATION VI", ]$FavGame5 <- "CIVILIZATION 6"
+
+#Civ 5
+Civ5Pattern <- c("CIVILIZATION V", "CIV 5", "Civilations V")
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% Civ5Pattern, ]$GameTitle <- "CIVILIZATION 5"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% Civ5Pattern, ]$FavGame1 <- "CIVILIZATION 5"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% Civ5Pattern, ]$FavGame2 <- "CIVILIZATION 5"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% Civ5Pattern, ]$FavGame3 <- "CIVILIZATION 5"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% Civ5Pattern, ]$FavGame4 <- "CIVILIZATION 5"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% Civ5Pattern, ]$FavGame5 <- "CIVILIZATION 5"
+
+#AssassinsCreed 2
+ACreed2Pattern <- c("ASSASSIN<U+0092>S CREED 2", "ASSASSIN'S CREED II")
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% ACreed2Pattern, ]$GameTitle <- "ASSASSIN'S CREED 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% ACreed2Pattern, ]$FavGame1 <- "ASSASSIN'S CREED 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% ACreed2Pattern, ]$FavGame2 <- "ASSASSIN'S CREED 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% ACreed2Pattern, ]$FavGame3 <- "ASSASSIN'S CREED 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% ACreed2Pattern, ]$FavGame4 <- "ASSASSIN'S CREED 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% ACreed2Pattern, ]$FavGame5 <- "ASSASSIN'S CREED 2"
+
+#AssassinsCreed Origins
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% "ASSASSIN'S CREED: ORIGINS (UBISOFT 2017)", ]$GameTitle <- "ASSASSIN'S CREED ORIGINS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% "ASSASSIN'S CREED: ORIGINS (UBISOFT 2017)", ]$FavGame1 <- "ASSASSIN'S CREED ORIGINS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% "ASSASSIN'S CREED: ORIGINS (UBISOFT 2017)", ]$FavGame2 <- "ASSASSIN'S CREED ORIGINS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% "ASSASSIN'S CREED: ORIGINS (UBISOFT 2017)", ]$FavGame3 <- "ASSASSIN'S CREED ORIGINS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% "ASSASSIN'S CREED: ORIGINS (UBISOFT 2017)", ]$FavGame4 <- "ASSASSIN'S CREED ORIGINS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% "ASSASSIN'S CREED: ORIGINS (UBISOFT 2017)", ]$FavGame5 <- "ASSASSIN'S CREED ORIGINS"
+
+#Divinity
+DivintyPattern <- c("DIVINITY OF SIN 2", "DIVINITY ORIGINAL SIN II", "DIVINITY ORIGINAL SIN2")
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% DivintyPattern, ]$GameTitle <- "DIVINITY ORIGINAL SIN 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% DivintyPattern, ]$FavGame1 <- "DIVINITY ORIGINAL SIN 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% DivintyPattern, ]$FavGame2 <- "DIVINITY ORIGINAL SIN 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% DivintyPattern, ]$FavGame3 <- "DIVINITY ORIGINAL SIN 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% DivintyPattern, ]$FavGame4 <- "DIVINITY ORIGINAL SIN 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% DivintyPattern, ]$FavGame5 <- "DIVINITY ORIGINAL SIN 2"
+
+#LAST OF US 1
+LOU1Pattern <- c("LAST OF US", "LAST OF US PART 1")
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% LOU1Pattern, ]$GameTitle <- "THE LAST OF US"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% LOU1Pattern, ]$FavGame1 <- "THE LAST OF US"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% LOU1Pattern, ]$FavGame2 <- "THE LAST OF US"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% LOU1Pattern, ]$FavGame3 <- "THE LAST OF US"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% LOU1Pattern, ]$FavGame4 <- "THE LAST OF US"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% LOU1Pattern, ]$FavGame5 <- "THE LAST OF US"
+
+#LAST OF US 2
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% "THE LAST OF US 2", ]$GameTitle <- "THE LAST OF US PART 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% "THE LAST OF US 2", ]$FavGame1 <- "THE LAST OF US PART 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% "THE LAST OF US 2", ]$FavGame2 <- "THE LAST OF US PART 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% "THE LAST OF US 2", ]$FavGame3 <- "THE LAST OF US PART 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% "THE LAST OF US 2", ]$FavGame4 <- "THE LAST OF US PART 2"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% "THE LAST OF US 2", ]$FavGame5 <- "THE LAST OF US PART 2"
+
+#Fallout NV
+NewVegasPattern <- c("FALLOUT NEW VEGAS", "FALLOUT: NEW VEGAS (MODDED)")
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% NewVegasPattern, ]$GameTitle <- "FALLOUT: NEW VEGAS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% NewVegasPattern, ]$FavGame1 <- "FALLOUT: NEW VEGAS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% NewVegasPattern, ]$FavGame2 <- "FALLOUT: NEW VEGAS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% NewVegasPattern, ]$FavGame3 <- "FALLOUT: NEW VEGAS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% NewVegasPattern, ]$FavGame4 <- "FALLOUT: NEW VEGAS"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% NewVegasPattern, ]$FavGame5 <- "FALLOUT: NEW VEGAS"
+
+#Witcher
+WitcherPattern <- c("THE WITCHER 3", "WITCHER 3")
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% WitcherPattern, ]$GameTitle <- "THE WITCHER 3: WILD HUNT"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% WitcherPattern, ]$FavGame1 <- "THE WITCHER 3: WILD HUNT"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% WitcherPattern, ]$FavGame2 <- "THE WITCHER 3: WILD HUNT"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% WitcherPattern, ]$FavGame3 <- "THE WITCHER 3: WILD HUNT"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% WitcherPattern, ]$FavGame4 <- "THE WITCHER 3: WILD HUNT"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% WitcherPattern, ]$FavGame5 <- "THE WITCHER 3: WILD HUNT"
+
+#GTA
+GTAPattern <- c("GRAND THEFT AUTO 5", "GTAV")
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% GTAPattern, ]$GameTitle <- "GTA V"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% GTAPattern, ]$FavGame1 <- "GTA V"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% GTAPattern, ]$FavGame2 <- "GTA V"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% GTAPattern, ]$FavGame3 <- "GTA V"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% GTAPattern, ]$FavGame4 <- "GTA V"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% GTAPattern, ]$FavGame5 <- "GTA V"
+
+#NIER AUTOMATA
+FavouriteGames_DF[FavouriteGames_DF$GameTitle %in% "NIER AUTOMATA", ]$GameTitle <- "NIER: AUTOMATA"
+FavouriteGames_DF[FavouriteGames_DF$FavGame1 %in% "NIER AUTOMATA", ]$FavGame1 <- "NIER: AUTOMATA"
+FavouriteGames_DF[FavouriteGames_DF$FavGame2 %in% "NIER AUTOMATA", ]$FavGame2 <- "NIER: AUTOMATA"
+FavouriteGames_DF[FavouriteGames_DF$FavGame3 %in% "NIER AUTOMATA", ]$FavGame3 <- "NIER: AUTOMATA"
+FavouriteGames_DF[FavouriteGames_DF$FavGame4 %in% "NIER AUTOMATA", ]$FavGame4 <- "NIER: AUTOMATA"
+FavouriteGames_DF[FavouriteGames_DF$FavGame5 %in% "NIER AUTOMATA", ]$FavGame5 <- "NIER: AUTOMATA"
+
+
+#Count all instances of a specific game called art:
+#Create a vector with all the favourite games
+AllFavGames <- c(FavouriteGames_DF$FavGame1, FavouriteGames_DF$FavGame2, FavouriteGames_DF$FavGame3, FavouriteGames_DF$FavGame4, FavouriteGames_DF$FavGame5)
+AllFavGames <- na.omit(AllFavGames)
+AllFavGames <- fct_count(AllFavGames, sort=TRUE)
+colnames(AllFavGames) <- c("Favourite Game", "Mentions")
+write.csv(AllFavGames, "FavGames.csv")
+
+
+FavouriteGames_DF[is.na(FavouriteGames_DF)] <- "N/A"
+
+FavouriteGames_DF <- FavouriteGames_DF %>%
+  #replace(FavouriteGames_DF, is.na(FavouriteGames_DF), "N/A") %>%
+  mutate(match = (str_detect(FavGame1, GameTitle) |
+                    str_detect(FavGame2, GameTitle) |
+                    str_detect(FavGame3, GameTitle) |
+                    str_detect(FavGame4, GameTitle) |
+                    str_detect(FavGame5, GameTitle))
+        )
+```
+Of the `r nrow(FavouriteGames_DF)` participants indicating an artful videogame experience, `r sum(FavouriteGames_DF$match == TRUE)` (`r round(sum(FavouriteGames_DF$match == TRUE)*100 / nrow(FavouriteGames_DF), 2)`%) counted the game as one of their favourites. It has to be noted, that this observation might, in part be due to the availability of said title, as the recollection task was done before the participants named up to five of their favourite games.
+
+Another confounding factor might be that many participants recounted a rather recent experience:
+```{r}
+freqLongAgo <- DataSet %>%
+  filter(!is.na(GameTitle)) %>%
+  freq(DataSet$`LongAgo. How_long_ago_di.._`, order = "freq")
+freqPlayedBefore <- DataSet %>%
+  filter(!is.na(GameTitle)) %>%
+  freq(DataSet$`PlayedBefore. Have_you_played.._`, order = "freq")
+freqTimeToExperience <- DataSet %>%
+  filter(!is.na(GameTitle)) %>%
+  freq(DataSet$`TimeToExperience. Where_in_the_ga.._`, order = "freq")
+```
+
+`r knitr::kable(freqLongAgo[,1:2])`
+
+
+```{r}
+AllArtGames <- fct_count(FavouriteGames_DF$GameTitle, sort=TRUE)
+colnames(AllArtGames) <- c("Elicited and Artful Experience", "Mentions")
+```
+
+Several games where mentioned quite a lot by the participants, both as a game to elicit an artful experience and being on of the participants favourite games.
+`r knitr::kable(list(head(AllArtGames,10),head(AllFavGames, 10)))`
+It has to be noted, that while Skyrim is by far the game mentioned most often as a favourite, only 2 people (ID456, 666) mentioned it as their artful experience.
+
+
+For `r round(freqPlayedBefore[1,2], 2)`% of participants, the experience happened during their first exposure to the game.
+
+When asked where in the game the experience happened, many participants indicated, that the experience happened during the general gameplay, not at any specific moment. People who indicated "Other", often times pointed out, that the whole game was deemed as the described experience (e.g., ID 11, 13, 20, 22, 27). Further, it could be that when mentioning their favourite game, not all people specified that they meant The Last of Us Part 2, leading to a higher mention of it as a favourite game while Part 2 was mentioned more often as an artful experience. (Further, two people indicated both The Last of Us 1 and 2 as their favourite games)
+
+`r knitr::kable(freqTimeToExperience[,1:2])`
+
+
+
 # Descriptives for the AESTHEMOS
 
 ## General Descriptive AESTHEMOS Data
 
 The following tables feature the Mean and SD of each Item and Subscale of the AESTHEMOS
-```{r  echo=FALSE}
+```{r}
 AESTHEMOSDescript <- DataSet %>%
   select(ends_with("_AESTHEMOS")) %>%
   filter(!is.na(FeelingOfBeauty_1_AESTHEMOS))
@@ -964,7 +1263,7 @@ DataSet$CountYes <- rowSums(DataSet[68:81] == "Yes")
 
 
 
-DataSet %>%
+ExpertiseSummary <- DataSet %>%
   summarise(TimeInYears_mean = mean(`Years. For_how_many_ye.._`),
               TimeInYears_SD = sd(`Years. For_how_many_ye.._`),
             TimePerWeek_mean = mean(`HoursPerWeek. How_many_hours_.._`),
@@ -979,10 +1278,12 @@ DataSet %>%
 
 
 ```
+`r knitr::kable(ExpertiseSummary)`
 
 Expertise was measured directly via two continuous self report measures:
-- Experience
-- Broadness of Taste
+
+* Experience
+* Broadness of Taste
 
 ```{r}
 ggplot(DataSet, aes(DataSet$`ExperienceGeneral[SQ001]. Please_rate_the..__[I_am_experience.._]`, DataSet$`ExperienceGeneral[SQ003]. Please_rate_the..__[As_how_broad_wo.._]`)) +
@@ -1019,7 +1320,7 @@ ggplot(DataSet, aes(DataSet$`ExperienceGeneral[SQ003]. Please_rate_the..__[As_ho
 corBroad <- cor(DataSet$`ExperienceGeneral[SQ003]. Please_rate_the..__[As_how_broad_wo.._]`, DataSet$CountYes, use = "complete.obs")
 ```
 
-As expected, the self report of broadness of taste correlates highly with the enjyoed genres (*r = *`r corBroad`).
+As expected, the self report of broadness of taste correlates highly with the enjoyed genres (*r = *`r corBroad`).
 
 
 
@@ -1055,9 +1356,22 @@ p1+p2
 While people working with videogames barely differentiate themselves from the other participants, they report a slightly broader taste. However, given the vast different in sample size, this should be taken with a grain of salt.
 
 
+# The Absence of Videogames as Art.
+```{r}
+freqOtherArt <- NoVGasArt %>%
+  freq(`EXPInOtherArtYN. Did_you_ever_ex.._`)
 
+freqPotential <- NoVGasArt %>%
+  freq(`NoExperienceYN. Do_you_think_di.._`)
 
+freqForms <- NoVGasArt %>%
+  freq(`ExpInOtherArtType. What_form_of_me.._`)
+```
+Few people indicated, that they never had any experience with video games that they would classify as art `r nrow(NoVGasArt)` (`r round(nrow(NoVGasArt)*100 / nrow(DataSet), 2)`%). Of these `r freqOtherArt[2,1]` (`r round(freqOtherArt[2,2],2)`%) indicated they had experience with other forms of art. As written before, ID620 indicated, that they did not believe in the term art and therefore did not agree with any of the questions.
 
+Besides ID620 only one other person noted, that videogames cannot be experienced as art as, while the parts my be art, the game itself is only a vessel and therefore not itself art.
+
+Of the 6 people, 4 people (`r freqForms[3,2]`%) indicated they experienced art with other mediums. Two of which where with visual art, one with music and one noted "`r NoVGasArt[2,18]`" (ID319), which might indicated a form of natural beauty or maybe theoretical model.
 
 
 
