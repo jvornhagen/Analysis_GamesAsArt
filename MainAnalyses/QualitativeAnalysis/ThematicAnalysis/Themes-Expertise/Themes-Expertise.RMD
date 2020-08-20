@@ -286,3 +286,35 @@ And the middle of the scale (50) resulting in `r nrow(Middle_DF %>% filter(SelfR
 print(MiddleSplitPlot)
 ```
 
+
+# Relationship between the Themes
+```{r}
+#Only Take the Themes
+cor_DF <- ThemesExpertise_DF %>%
+  select(3:9)
+
+corMat <- round(cor(cor_DF, method = "pearson"), 2)
+corMat[upper.tri(corMat)] <- NA
+meltedCorMat <- melt(corMat, na.rm = TRUE)
+
+
+ggplot(data = meltedCorMat, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile(color="white") +
+  theme(panel.background = element_blank()) +
+  ggtitle("Themes Correlations") +
+  xlab("") +
+  ylab("") + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+    size = 12, hjust = 1)) +
+  scale_fill_gradient2(high="#811CA6", mid="#A61C48", low="#DD4613", space ="Lab", limit = c(-1,1),
+                       name= expression(paste("Pearson ", phi))) +
+  geom_text(aes(Var1, Var2, label = value), color = "black", size = 4) +
+  theme(legend.direction = "horizontal", , legend.position = c(0.3,0.82)) +
+  guides(fill = guide_colorbar(barwidth = 7, barheight = 1,
+                title.position = "top", title.hjust = 0.5))
+
+```
+
+`r knitr::kable(corMat)`
+
+
