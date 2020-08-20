@@ -14,7 +14,7 @@ editor_options:
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
 
-This doc gives some exploratory insight into the DataSet
+This doc gives some exploratory insight into the Themes and Expertise
 
 
 ```{r  include=FALSE}
@@ -26,8 +26,10 @@ if(!require(tidyverse)){install.packages('tidyverse')}
 if(!require(readxl)){install.packages('readxl')}
 if(!require(summarytools)){install.packages('summarytools')}
 if(!require(patchwork)){install.packages('patchwork')}
+if(!require(ggsignif)){install.packages('ggsignif')}
 library(tidyverse, summarytools, patchwork)
 library(readxl)
+library(ggsignif)
 ##Set Working DIR so Input&Output is correct
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ```
@@ -47,19 +49,23 @@ Expertise_DF <- DataSet %>%
   select(`id..Response_ID`,
          `Years..For_how_many_ye.._`, `HoursPerWeek..How_many_hours_.._`,
            `ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._.`, `ExperienceGeneral.SQ003...Please_rate_the..__.As_how_broad_wo.._.`, 
-         `OccupationVG..Do_you_currentl.._`, `OccupationArt..Do_you_currentl.._`)
+         `OccupationVG..Do_you_currentl.._`, `OccupationArt..Do_you_currentl.._`) %>%
+  rename(OccupationVG = `OccupationVG..Do_you_currentl.._`) %>%
+  rename(OccupationArt = `OccupationArt..Do_you_currentl.._`)
 
 ThemesExpertise_DF <- full_join(Themes_DF, Expertise_DF, by ="id..Response_ID")
 ```
 
 
-# Did Experts name more topics:
+## Did Professionals name more topics:
+
+First, we separated experts(`r nrow(ThemesExpertise_DF %>% filter(OccupationVG == "Yes"))`) and non-experts(`r nrow(ThemesExpertise_DF %>% filter(OccupationVG == "No"))`) by their occupational status
 ```{r}
 #Create Count:
 ThemesExpertise_DF <- ThemesExpertise_DF %>%
   mutate(Count_Themes = `The Feels`+`Expressive potential of games`+craft+`exploration of interpretation`+`the thinks`+`visual beauty`+`all games art`)
 
-ggplot(ThemesExpertise_DF, aes(ThemesExpertise_DF$OccupationVG..Do_you_currentl.._, ThemesExpertise_DF$Count_Themes)) +
+ggplot(ThemesExpertise_DF, aes(ThemesExpertise_DF$OccupationVG, ThemesExpertise_DF$Count_Themes)) +
   geom_violin() +
   geom_boxplot(width=0.1) +
   xlab("Expert") + 
@@ -68,28 +74,215 @@ ggplot(ThemesExpertise_DF, aes(ThemesExpertise_DF$OccupationVG..Do_you_currentl.
 
 ```
 
-# Which Themes were mentioned how often by which group?
+## Which Themes were mentioned how often by which group?
+
+
 ```{r}
 
-d <- ThemesExpertise_DF %>%
-  select(15, 3:9) %>%
+JobExpert_DF <- ThemesExpertise_DF %>%
+  select(14, 3:9) %>%
   pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
-  group_by(`OccupationArt..Do_you_currentl.._`, `Theme`) %>%
+  group_by(OccupationVG, `Theme`) %>%
   summarize(total = sum(`Sum`))
 
-d <- d %>%
-  mutate(percent = ifelse(`OccupationArt..Do_you_currentl.._` == "Yes", 
-                   `total`*100/nrow(ThemesExpertise_DF %>% filter(`OccupationVG..Do_you_currentl.._` == "Yes")), 
-                   `total`*100/nrow(ThemesExpertise_DF %>% filter(`OccupationVG..Do_you_currentl.._` == "No"))))
+JobExpert_DF_Pivot <- JobExpert_DF %>%
+  mutate(percent = ifelse(OccupationVG == "Yes", 
+                   `total`*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG == "Yes")), 
+                   `total`*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG == "No"))))
+
+#Annotations for differences and Y positions
+
+annotationsJobExpert <- as.numeric(
+  c(JobExpert_DF_Pivot[8,4]-JobExpert_DF_Pivot[1,4],JobExpert_DF_Pivot[9,4]-JobExpert_DF_Pivot[2,4],JobExpert_DF_Pivot[10,4]-JobExpert_DF_Pivot[3,4],
+                 JobExpert_DF_Pivot[11,4]-JobExpert_DF_Pivot[4,4],JobExpert_DF_Pivot[12,4]-JobExpert_DF_Pivot[5,4],JobExpert_DF_Pivot[13,4]-JobExpert_DF_Pivot[6,4],
+                 JobExpert_DF_Pivot[14,4]-JobExpert_DF_Pivot[7,4]))
+
+yPositionsJobExpert <- c(as.numeric(JobExpert_DF_Pivot[8,4])+15, as.numeric(JobExpert_DF_Pivot[9,4])+15, as.numeric(JobExpert_DF_Pivot[10,4])+15,
+                             as.numeric(JobExpert_DF_Pivot[11,4])+15, as.numeric(JobExpert_DF_Pivot[12,4])+15,
+                             as.numeric(JobExpert_DF_Pivot[13,4])+15, as.numeric(JobExpert_DF_Pivot[7,4])+15)
 
 
-
-ggplot(d, aes(`Theme`, percent, fill = `OccupationArt..Do_you_currentl.._`)) +
+ggplot(JobExpert_DF_Pivot, aes(`Theme`, percent, fill = OccupationVG)) +
   geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_manual(name="Expert", values=c("#dd4613","#A71C49")) +
+  ggtitle("Professional Split") +
+  scale_fill_manual(name="Expert", values=c("#dd4613","#A71C49")) +  
+  geom_signif(xmin=c(0.8, 1.8, 2.8, 3.8, 4.8, 5.8, 6.8), xmax=c(1.2,2.2,3.2,4.2,5.2,6.2,7.2),
+              y_position = yPositionsJobExpert,
+              annotation = round(annotationsJobExpert,2)) +
   ylim(0, 100) +
   coord_flip()
   
 
+```
+
+## Self Reported Expertise
+
+As professionalism does not have an exclusivity to expertise, we further looked at the self reported expertise:
+```{r}
+#View Self Reported Expertise:
+ggplot(ThemesExpertise_DF %>% filter(!is.na(ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._.)), 
+        aes(`ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._.`)) + 
+        geom_histogram(binwidth = 5, fill="#A71C49") +
+        xlab("Self Reported Experience")
+```
+
+The distribution of self reported expertise is rather skewed to the right, with many participants rating themselves at the top end of the scale. Therefore a median and mean split result in a rather high cut-off point.
+
+
+```{r}
+#Performing a median split to determine Expertise and selecting relevant Columns
+Median_DF <- ThemesExpertise_DF %>%
+  mutate(SelfReportExpert = ifelse(
+    `ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._.`<=median(`ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._.`, na.rm=TRUE),
+    "No", "Yes")) %>%
+  select(SelfReportExpert, 3:9) %>%
+  filter(!is.na(SelfReportExpert))
+
+#Pivoting
+Median_DF_Pivot <- Median_DF %>%
+  pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
+  group_by(SelfReportExpert, `Theme`) %>%
+  summarize(total = sum(`Sum`))
+
+#Compute percent to deal with differences in N
+Median_DF_Pivot <- Median_DF_Pivot %>%
+  mutate(percent = ifelse(SelfReportExpert == "Yes", 
+                   `total`*100/nrow(Median_DF %>% filter(Median_DF$SelfReportExpert == "Yes")), 
+                   `total`*100/nrow(Median_DF %>% filter(Median_DF$SelfReportExpert == "No"))))
+
+#Annotations for differences and Y positions
+
+annotationsMedian <- as.numeric(
+  c(Median_DF_Pivot[8,4]-Median_DF_Pivot[1,4],Median_DF_Pivot[9,4]-Median_DF_Pivot[2,4],Median_DF_Pivot[10,4]-Median_DF_Pivot[3,4],
+                 Median_DF_Pivot[11,4]-Median_DF_Pivot[4,4],Median_DF_Pivot[12,4]-Median_DF_Pivot[5,4],Median_DF_Pivot[13,4]-Median_DF_Pivot[6,4],
+                 Median_DF_Pivot[14,4]-Median_DF_Pivot[7,4]))
+
+yPositionsMedian <- c(as.numeric(Median_DF_Pivot[8,4])+15, as.numeric(Median_DF_Pivot[9,4])+15, as.numeric(Median_DF_Pivot[10,4])+15,
+                             as.numeric(Median_DF_Pivot[11,4])+15, as.numeric(Median_DF_Pivot[12,4])+15,
+                             as.numeric(Median_DF_Pivot[13,4])+15, as.numeric(Median_DF_Pivot[14,4])+15)
+
+
+MedianSplitPlot <- ggplot(Median_DF_Pivot, aes(`Theme`, percent, fill = SelfReportExpert)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(name="Expert", values=c("#dd4613","#A71C49")) +
+  ggtitle("Median Split") +
+  ylim(0, 100) +
+  geom_signif(xmin=c(0.8, 1.8, 2.8, 3.8, 4.8, 5.8, 6.8), xmax=c(1.2,2.2,3.2,4.2,5.2,6.2,7.2),
+              y_position = yPositionsMedian,
+              annotation = round(annotationsMedian,2)) +
+  coord_flip()
+
+median_SelfReportExpert <- median(ThemesExpertise_DF$ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._., na.rm=TRUE)
+mean_SelfReportExpert <- mean(ThemesExpertise_DF$ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._., na.rm=TRUE)
+```
+
+We perform a median (`r median_SelfReportExpert`) split to differentiate between self reported experts (`r nrow(Median_DF %>% filter(SelfReportExpert == "Yes"))`) and non-experts(`r nrow(Median_DF %>% filter(SelfReportExpert == "No"))`):
+
+```{r}
+print(MedianSplitPlot)
+```
+
+
+
+
+```{r}
+#Performing a mean split to determine Expertise and selecting relevant Columns
+Mean_DF <- ThemesExpertise_DF %>%
+  mutate(SelfReportExpert = ifelse(
+    `ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._.`<=mean(`ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._.`, na.rm=TRUE),
+    "No", "Yes")) %>%
+  select(SelfReportExpert, 3:9) %>%
+  filter(!is.na(SelfReportExpert))
+
+#Pivoting
+Mean_DF_Pivot <- Mean_DF %>%
+  pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
+  group_by(SelfReportExpert, `Theme`) %>%
+  summarize(total = sum(`Sum`))
+
+#Compute percent to deal with differences in N
+Mean_DF_Pivot <- Mean_DF_Pivot %>%
+  mutate(percent = ifelse(SelfReportExpert == "Yes", 
+                   `total`*100/nrow(Median_DF %>% filter(Mean_DF$SelfReportExpert == "Yes")), 
+                   `total`*100/nrow(Median_DF %>% filter(Mean_DF$SelfReportExpert == "No"))))
+
+#Annotations an Y Positions
+annotationsMean <- as.numeric(
+  c(Mean_DF_Pivot[8,4]-Mean_DF_Pivot[1,4],Mean_DF_Pivot[9,4]-Mean_DF_Pivot[2,4],Mean_DF_Pivot[10,4]-Mean_DF_Pivot[3,4],
+                 Mean_DF_Pivot[11,4]-Mean_DF_Pivot[4,4],Mean_DF_Pivot[12,4]-Mean_DF_Pivot[5,4],Mean_DF_Pivot[13,4]-Mean_DF_Pivot[6,4],
+                 Mean_DF_Pivot[14,4]-Mean_DF_Pivot[7,4]))
+
+yPositionsMean <- c(as.numeric(Mean_DF_Pivot[8,4])+15, as.numeric(Mean_DF_Pivot[9,4])+15, as.numeric(Mean_DF_Pivot[10,4])+15,
+                             as.numeric(Mean_DF_Pivot[11,4])+15, as.numeric(Mean_DF_Pivot[12,4])+15,
+                             as.numeric(Mean_DF_Pivot[13,4])+15, as.numeric(Mean_DF_Pivot[14,4])+15)
+
+
+MeanSplitPlot <- ggplot(Mean_DF_Pivot, aes(`Theme`, percent, fill = SelfReportExpert)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  ggtitle("Mean Split") +
+  scale_fill_manual(name="Expert", values=c("#dd4613","#A71C49")) +
+  ylim(0, 100) +
+  geom_signif(xmin=c(0.8, 1.8, 2.8, 3.8, 4.8, 5.8, 6.8), xmax=c(1.2,2.2,3.2,4.2,5.2,6.2,7.2),
+              y_position = yPositionsMean,
+              annotation = round(annotationsMean,2)) +
+  coord_flip()
+```
+
+Therefore we further performed a split around the mean (`r round(mean_SelfReportExpert, 2)`) resulting in `r nrow(Mean_DF %>% filter(SelfReportExpert == "Yes"))` experts and `r nrow(Mean_DF %>% filter(SelfReportExpert == "No"))` non-experts:
+
+```{r}
+print(MeanSplitPlot)
+```
+
+
+
+```{r}
+#Performing a middle split to determine Expertise and selecting relevant Columns
+Middle_DF <- ThemesExpertise_DF %>%
+  mutate(SelfReportExpert = ifelse(
+    `ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._.`<= 50,
+    "No", "Yes")) %>%
+  select(SelfReportExpert, 3:9) %>%
+  filter(!is.na(SelfReportExpert))
+
+#Pivoting
+Middle_DF_Pivot <- Middle_DF %>%
+  pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
+  group_by(SelfReportExpert, `Theme`) %>%
+  summarize(total = sum(`Sum`))
+
+#Compute percent to deal with differences in N
+Middle_DF_Pivot <- Middle_DF_Pivot %>%
+  mutate(percent = ifelse(SelfReportExpert == "Yes", 
+                   `total`*100/nrow(Median_DF %>% filter(Middle_DF$SelfReportExpert == "Yes")), 
+                   `total`*100/nrow(Median_DF %>% filter(Middle_DF$SelfReportExpert == "No"))))
+
+
+#Annotations for differences and yPositions
+annotationsMiddle <- as.numeric(
+  c(Middle_DF_Pivot[8,4]-Middle_DF_Pivot[1,4],Middle_DF_Pivot[9,4]-Middle_DF_Pivot[2,4],Middle_DF_Pivot[10,4]-Middle_DF_Pivot[3,4],
+                 Middle_DF_Pivot[11,4]-Middle_DF_Pivot[4,4],Middle_DF_Pivot[12,4]-Middle_DF_Pivot[5,4],Middle_DF_Pivot[13,4]-Middle_DF_Pivot[6,4],
+                 Middle_DF_Pivot[14,4]-Middle_DF_Pivot[7,4]))
+
+yPositionsMiddle <- c(as.numeric(Middle_DF_Pivot[8,4])+15, as.numeric(Middle_DF_Pivot[2,4])+15, as.numeric(Middle_DF_Pivot[10,4])+15,
+                             as.numeric(Middle_DF_Pivot[11,4])+15, as.numeric(Middle_DF_Pivot[12,4])+15,
+                             as.numeric(Middle_DF_Pivot[13,4])+15, as.numeric(Middle_DF_Pivot[14,4])+15)
+
+
+MiddleSplitPlot <- ggplot(Middle_DF_Pivot, aes(`Theme`, percent, fill = SelfReportExpert)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  ggtitle("Middle Split") +
+  scale_fill_manual(name="Expert", values=c("#dd4613","#A71C49")) +
+  ylim(0, 100) +
+  geom_signif(xmin=c(0.8, 1.8, 2.8, 3.8, 4.8, 5.8, 6.8), xmax=c(1.2,2.2,3.2,4.2,5.2,6.2,7.2),
+              y_position = yPositionsMiddle,
+              annotation = round(annotationsMiddle,2)) +
+  coord_flip()
+```
+
+And the middle of the scale (50) resulting in `r nrow(Middle_DF %>% filter(SelfReportExpert == "Yes"))` experts and `r nrow(Middle_DF %>% filter(SelfReportExpert == "No"))` non-experts:
+
+```{r}
+print(MiddleSplitPlot)
 ```
 
