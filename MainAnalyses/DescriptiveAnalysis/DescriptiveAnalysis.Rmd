@@ -499,10 +499,10 @@ EnergyDescript <- AESTHEMOSDescript %>%
             )
 
 RelaxationDescript <- AESTHEMOSDescript %>%
-    summarise(Mean_Motivated = mean(Relaxation_1_AESTHEMOS),
-              SD_Motivated = sd(Relaxation_1_AESTHEMOS),
-            Mean_Energized = mean(Relaxation_2_AESTHEMOS),
-              SD_Energized = sd(Relaxation_2_AESTHEMOS),
+    summarise(Mean_Calmed = mean(Relaxation_1_AESTHEMOS),
+              SD_Calmed = sd(Relaxation_1_AESTHEMOS),
+            Mean_Relaxed = mean(Relaxation_2_AESTHEMOS),
+              SD_Relaxed = sd(Relaxation_2_AESTHEMOS),
             Mean_Relaxation = (mean(Relaxation_1_AESTHEMOS)+mean(Relaxation_2_AESTHEMOS))/2,
               PooledSD_Relaxation = sqrt((sd(Relaxation_1_AESTHEMOS)^2 + sd(Relaxation_2_AESTHEMOS)^2)/2)
             )

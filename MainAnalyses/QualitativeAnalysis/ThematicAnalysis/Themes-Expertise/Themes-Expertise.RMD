@@ -10,9 +10,12 @@ editor_options:
 ---
 
 
+
 ```{r setup, include=TRUE, echo=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
+
+
 
 This doc gives some exploratory insight into the Themes and Expertise
 
@@ -27,9 +30,11 @@ if(!require(readxl)){install.packages('readxl')}
 if(!require(summarytools)){install.packages('summarytools')}
 if(!require(patchwork)){install.packages('patchwork')}
 if(!require(ggsignif)){install.packages('ggsignif')}
+if(!require(ggsignif)){install.packages('reshape2')}
 library(tidyverse, summarytools, patchwork)
 library(readxl)
 library(ggsignif)
+library(reshape2)
 ##Set Working DIR so Input&Output is correct
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ```
@@ -60,6 +65,8 @@ ThemesExpertise_DF <- full_join(Themes_DF, Expertise_DF, by ="id..Response_ID")
 ## Did Professionals name more topics:
 
 First, we separated experts(`r nrow(ThemesExpertise_DF %>% filter(OccupationVG == "Yes"))`) and non-experts(`r nrow(ThemesExpertise_DF %>% filter(OccupationVG == "No"))`) by their occupational status
+
+
 ```{r}
 #Create Count:
 ThemesExpertise_DF <- ThemesExpertise_DF %>%
@@ -79,9 +86,25 @@ ggplot(ThemesExpertise_DF, aes(ThemesExpertise_DF$OccupationVG, ThemesExpertise_
 
 ```{r}
 
+nThemes <- data.frame(nAllGamesArt = sum(Themes_DF$`all games art`),
+                      nCraft = sum(Themes_DF$craft),
+                      nExploration = sum(Themes_DF$`exploration of interpretation`),
+                      nExpressive = sum(Themes_DF$`Expressive potential of games`),
+                      nFeels = sum(Themes_DF$`The Feels`),
+                      nThinks = sum(Themes_DF$`the thinks`),
+                      nBeauty = sum(Themes_DF$`visual beauty`))
+
 JobExpert_DF <- ThemesExpertise_DF %>%
   select(14, 3:9) %>%
   pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
+  #Renaming is done per hand from nThemes as fct_recode doesn't play well with Parse
+    mutate(`Theme` = fct_recode(`Theme`, "All Games Are Art (yes = 9)" = "all games art",
+                                 "Craft (yes = 66)" = "craft",
+                                 "Exploration Of Interpretation (yes = 10)" = "exploration of interpretation",
+                                 "Expressive Potential of Games (yes = 51)" = "Expressive potential of games",
+                                 "The Feels (yes = 59)" = "The Feels",
+                                 "The Thinks (yes = 19)" = "the thinks",
+                                 "Visual Beauty (yes = 37)" = "visual beauty")) %>%
   group_by(OccupationVG, `Theme`) %>%
   summarize(total = sum(`Sum`))
 
@@ -118,6 +141,8 @@ ggplot(JobExpert_DF_Pivot, aes(`Theme`, percent, fill = OccupationVG)) +
 ## Self Reported Expertise
 
 As professionalism does not have an exclusivity to expertise, we further looked at the self reported expertise:
+
+
 ```{r}
 #View Self Reported Expertise:
 ggplot(ThemesExpertise_DF %>% filter(!is.na(ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._.)), 
@@ -125,6 +150,7 @@ ggplot(ThemesExpertise_DF %>% filter(!is.na(ExperienceGeneral.SQ001...Please_rat
         geom_histogram(binwidth = 5, fill="#A71C49") +
         xlab("Self Reported Experience")
 ```
+
 
 The distribution of self reported expertise is rather skewed to the right, with many participants rating themselves at the top end of the scale. Therefore a median and mean split result in a rather high cut-off point.
 
@@ -141,6 +167,14 @@ Median_DF <- ThemesExpertise_DF %>%
 #Pivoting
 Median_DF_Pivot <- Median_DF %>%
   pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
+  #Renaming is done per hand from nThemes as fct_recode doesn't play well with Parse
+  mutate(`Theme` = fct_recode(`Theme`, "All Games Are Art (yes = 9)" = "all games art",
+                               "Craft (yes = 66)" = "craft",
+                               "Exploration Of Interpretation (yes = 10)" = "exploration of interpretation",
+                               "Expressive Potential of Games (yes = 51)" = "Expressive potential of games",
+                               "The Feels (yes = 59)" = "The Feels",
+                               "The Thinks (yes = 19)" = "the thinks",
+                               "Visual Beauty (yes = 37)" = "visual beauty")) %>%
   group_by(SelfReportExpert, `Theme`) %>%
   summarize(total = sum(`Sum`))
 
@@ -176,7 +210,9 @@ median_SelfReportExpert <- median(ThemesExpertise_DF$ExperienceGeneral.SQ001...P
 mean_SelfReportExpert <- mean(ThemesExpertise_DF$ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._., na.rm=TRUE)
 ```
 
+
 We perform a median (`r median_SelfReportExpert`) split to differentiate between self reported experts (`r nrow(Median_DF %>% filter(SelfReportExpert == "Yes"))`) and non-experts(`r nrow(Median_DF %>% filter(SelfReportExpert == "No"))`):
+
 
 ```{r}
 print(MedianSplitPlot)
@@ -197,6 +233,14 @@ Mean_DF <- ThemesExpertise_DF %>%
 #Pivoting
 Mean_DF_Pivot <- Mean_DF %>%
   pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
+  #Renaming is done per hand from nThemes as fct_recode doesn't play well with Parse
+  mutate(`Theme` = fct_recode(`Theme`, "All Games Are Art (yes = 9)" = "all games art",
+                               "Craft (yes = 66)" = "craft",
+                               "Exploration Of Interpretation (yes = 10)" = "exploration of interpretation",
+                               "Expressive Potential of Games (yes = 51)" = "Expressive potential of games",
+                               "The Feels (yes = 59)" = "The Feels",
+                               "The Thinks (yes = 19)" = "the thinks",
+                               "Visual Beauty (yes = 37)" = "visual beauty")) %>%
   group_by(SelfReportExpert, `Theme`) %>%
   summarize(total = sum(`Sum`))
 
@@ -228,7 +272,9 @@ MeanSplitPlot <- ggplot(Mean_DF_Pivot, aes(`Theme`, percent, fill = SelfReportEx
   coord_flip()
 ```
 
+
 Therefore we further performed a split around the mean (`r round(mean_SelfReportExpert, 2)`) resulting in `r nrow(Mean_DF %>% filter(SelfReportExpert == "Yes"))` experts and `r nrow(Mean_DF %>% filter(SelfReportExpert == "No"))` non-experts:
+
 
 ```{r}
 print(MeanSplitPlot)
@@ -248,6 +294,14 @@ Middle_DF <- ThemesExpertise_DF %>%
 #Pivoting
 Middle_DF_Pivot <- Middle_DF %>%
   pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
+  #Renaming is done per hand from nThemes as fct_recode doesn't play well with Parse
+  mutate(`Theme` = fct_recode(`Theme`, "All Games Are Art (yes = 9)" = "all games art",
+                               "Craft (yes = 66)" = "craft",
+                               "Exploration Of Interpretation (yes = 10)" = "exploration of interpretation",
+                               "Expressive Potential of Games (yes = 51)" = "Expressive potential of games",
+                               "The Feels (yes = 59)" = "The Feels",
+                               "The Thinks (yes = 19)" = "the thinks",
+                               "Visual Beauty (yes = 37)" = "visual beauty")) %>%
   group_by(SelfReportExpert, `Theme`) %>%
   summarize(total = sum(`Sum`))
 
@@ -280,15 +334,19 @@ MiddleSplitPlot <- ggplot(Middle_DF_Pivot, aes(`Theme`, percent, fill = SelfRepo
   coord_flip()
 ```
 
+
 And the middle of the scale (50) resulting in `r nrow(Middle_DF %>% filter(SelfReportExpert == "Yes"))` experts and `r nrow(Middle_DF %>% filter(SelfReportExpert == "No"))` non-experts:
+
 
 ```{r}
 print(MiddleSplitPlot)
 ```
 
 
-# Relationship between the Themes
-```{r}
+## Relationship between the Themes
+
+
+```{r fig.height=8, fig.width=8}
 #Only Take the Themes
 cor_DF <- ThemesExpertise_DF %>%
   select(3:9)
@@ -316,6 +374,481 @@ ggplot(data = meltedCorMat, aes(x=Var1, y=Var2, fill=value)) +
 
 ```
 
-`r knitr::kable(corMat)`
+
+## Themes and AESTHEMOS 
+```{r}
+
+#Get The AESTHEMOS Items from the NetworkDataSet
+AESTHEMOS_DF <- read.csv("../../../NetworkAnalysis/NetworkAnalysis_DataFile.csv")
+
+AESTHEMOS_DF <- AESTHEMOS_DF %>%
+  select(2, ends_with("_AESTHEMOS"))
+
+#Combine with themes
+ThemesAESTHEMOS_DF <- full_join(Themes_DF,AESTHEMOS_DF, by="id..Response_ID")
+
+```
 
 
+
+```{r}
+ThemesAESTHEMOS_DF_Pivot_Help <- ThemesAESTHEMOS_DF %>%
+  select(!1:2)
+
+ThemesAESTHEMOS_DF_Pivot <- ThemesAESTHEMOS_DF_Pivot_Help %>%
+  pivot_longer(1:7, names_to = "Thematic", values_to = "Yes/No") %>%
+  mutate(`Yes/No`=as.factor(`Yes/No`)) %>%
+  mutate(`Thematic`=as.factor(`Thematic`)) %>%
+  #This is done manually from the nThemes data frame as fct_recode doesn't work with parse
+  mutate(`Thematic` = fct_recode(`Thematic`, "All Games Are Art (9)" = "all games art",
+                                 "Craft (66)" = "craft",
+                                 "Exploration Of Interpretation (10)" = "exploration of interpretation",
+                                 "Expressive Potential of Games (51)" = "Expressive potential of games",
+                                 "The Feels (59)" = "The Feels",
+                                 "The Thinks (19)" = "the thinks",
+                                 "Visual Beauty (37)" = "visual beauty")) %>%
+  group_by(`Thematic`, `Yes/No`) %>%
+  summarize_if(is.numeric, list(~mean(., na.rm=TRUE), ~sd(., na.rm=TRUE)), na.rm=TRUE)
+
+
+##Create Tables for each AESTHEMOS Factor:
+FeelingOfBeauty <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         FeelingOfBeauty_1_AESTHEMOS_mean, FeelingOfBeauty_1_AESTHEMOS_sd,
+         FeelingOfBeauty_2_AESTHEMOS_mean, FeelingOfBeauty_2_AESTHEMOS_sd) %>%
+  mutate(Mean_FeelingOfBeauty = (`FeelingOfBeauty_1_AESTHEMOS_mean` + `FeelingOfBeauty_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_FeelingOfBeauty = sqrt((`FeelingOfBeauty_1_AESTHEMOS_sd`^2 + `FeelingOfBeauty_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_LikedIt" = FeelingOfBeauty_1_AESTHEMOS_mean) %>%
+  rename("SD_LikedIt" = FeelingOfBeauty_1_AESTHEMOS_sd) %>%
+  rename("Mean_Beautiful" = FeelingOfBeauty_2_AESTHEMOS_mean) %>%
+  rename("SD_Beautiful" = FeelingOfBeauty_2_AESTHEMOS_sd)
+
+Fascination <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Fascination_1_AESTHEMOS_mean, Fascination_1_AESTHEMOS_sd,
+         Fascination_2_AESTHEMOS_mean, Fascination_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Fascination = (`Fascination_1_AESTHEMOS_mean` + `Fascination_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Fascination = sqrt((`Fascination_1_AESTHEMOS_sd`^2 + `Fascination_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Impressed" = Fascination_1_AESTHEMOS_mean) %>%
+  rename("SD_Impressed" = Fascination_1_AESTHEMOS_sd) %>%
+  rename("Mean_Fascinated" = Fascination_2_AESTHEMOS_mean) %>%
+  rename("SD_Fascinated" = Fascination_2_AESTHEMOS_sd)
+
+BeingMoved <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         BeingMoved_1_AESTHEMOS_mean, BeingMoved_1_AESTHEMOS_sd,
+         BeingMoved_2_AESTHEMOS_mean, BeingMoved_2_AESTHEMOS_sd) %>%
+  mutate(Mean_BeingMoved = (`BeingMoved_1_AESTHEMOS_mean` + `BeingMoved_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_BeingMoved = sqrt((`BeingMoved_1_AESTHEMOS_sd`^2 + `BeingMoved_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_DeeplyMoved" = BeingMoved_1_AESTHEMOS_mean) %>%
+  rename("SD_DeeplyMoved" = BeingMoved_1_AESTHEMOS_sd) %>%
+  rename("Mean_Touched" = BeingMoved_2_AESTHEMOS_mean) %>%
+  rename("SD_Touched" = BeingMoved_2_AESTHEMOS_sd)
+
+Awe <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Awe_1_AESTHEMOS_mean, Awe_1_AESTHEMOS_sd,
+         Awe_2_AESTHEMOS_mean, Awe_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Awe = (`Awe_1_AESTHEMOS_mean` + `Awe_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Awe = sqrt((`Awe_1_AESTHEMOS_sd`^2 + `Awe_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Sublime" = Awe_1_AESTHEMOS_mean) %>%
+  rename("SD_Sublime" = Awe_1_AESTHEMOS_sd) %>%
+  rename("Mean_FeltAwe" = Awe_2_AESTHEMOS_mean) %>%
+  rename("SD_FeltAwe" = Awe_2_AESTHEMOS_sd)
+
+Enchantment <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Enchantment_1_AESTHEMOS_mean, Enchantment_1_AESTHEMOS_sd,
+         Enchantment_2_AESTHEMOS_mean, Enchantment_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Enchantment = (`Enchantment_1_AESTHEMOS_mean` + `Enchantment_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Enchantment = sqrt((`Enchantment_1_AESTHEMOS_sd`^2 + `Enchantment_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_SomethingWonderful" = Enchantment_1_AESTHEMOS_mean) %>%
+  rename("SD_SomethingWonderful" = Enchantment_1_AESTHEMOS_sd) %>%
+  rename("Mean_Enchanted" = Enchantment_2_AESTHEMOS_mean) %>%
+  rename("SD_Enchanted" = Enchantment_2_AESTHEMOS_sd)
+
+Nostalgia <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Nostalgia_1_AESTHEMOS_mean, Nostalgia_1_AESTHEMOS_sd,
+         Nostalgia_2_AESTHEMOS_mean, Nostalgia_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Nostalgia = (`Nostalgia_1_AESTHEMOS_mean` + `Nostalgia_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Nostalgia = sqrt((`Nostalgia_1_AESTHEMOS_sd`^2 + `Nostalgia_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Nostalgic" = Nostalgia_1_AESTHEMOS_mean) %>%
+  rename("SD_Nostalgic" = Nostalgia_1_AESTHEMOS_sd) %>%
+  rename("Mean_Sentimental" = Nostalgia_2_AESTHEMOS_mean) %>%
+  rename("SD_Sentimental" = Nostalgia_2_AESTHEMOS_sd)
+
+Joy <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Joy_1_AESTHEMOS_mean, Joy_1_AESTHEMOS_sd,
+         Joy_2_AESTHEMOS_mean, Joy_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Joy = (`Joy_1_AESTHEMOS_mean` + `Joy_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Joy = sqrt((`Joy_1_AESTHEMOS_sd`^2 + `Joy_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Delight" = Joy_1_AESTHEMOS_mean) %>%
+  rename("SD_Delight" = Joy_1_AESTHEMOS_sd) %>%
+  rename("Mean_Happy" = Joy_2_AESTHEMOS_mean) %>%
+  rename("SD_Happy" = Joy_2_AESTHEMOS_sd)
+
+Humor <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Humor_1_AESTHEMOS_mean, Humor_1_AESTHEMOS_sd,
+         Humor_2_AESTHEMOS_mean, Humor_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Humor = (`Humor_1_AESTHEMOS_mean` + `Humor_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Humor = sqrt((`Humor_1_AESTHEMOS_sd`^2 + `Humor_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Amused" = Humor_1_AESTHEMOS_mean) %>%
+  rename("SD_Amused" = Humor_1_AESTHEMOS_sd) %>%
+  rename("Mean_Funny" = Humor_2_AESTHEMOS_mean) %>%
+  rename("SD_Funny" = Humor_2_AESTHEMOS_sd)
+
+Vitality <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Vitality_1_AESTHEMOS_mean, Vitality_1_AESTHEMOS_sd,
+         Vitality_2_AESTHEMOS_mean, Vitality_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Vitality = (`Vitality_1_AESTHEMOS_mean` + `Vitality_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Vitality = sqrt((`Vitality_1_AESTHEMOS_sd`^2 + `Vitality_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Spurred" = Vitality_1_AESTHEMOS_mean) %>%
+  rename("SD_Spurred" = Vitality_1_AESTHEMOS_sd) %>%
+  rename("Mean_Invigorated" = Vitality_2_AESTHEMOS_mean) %>%
+  rename("SD_Invigorated" = Vitality_2_AESTHEMOS_sd)
+
+Energy <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Energy_1_AESTHEMOS_mean, Energy_1_AESTHEMOS_sd,
+         Energy_2_AESTHEMOS_mean, Energy_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Energy = (`Energy_1_AESTHEMOS_mean` + `Energy_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Energy = sqrt((`Energy_1_AESTHEMOS_sd`^2 + `Energy_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Motivated" = Energy_1_AESTHEMOS_mean) %>%
+  rename("SD_Motivated" = Energy_1_AESTHEMOS_sd) %>%
+  rename("Mean_Energized" = Energy_2_AESTHEMOS_mean) %>%
+  rename("SD_Energized" = Energy_2_AESTHEMOS_sd)
+
+Relaxation <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Relaxation_1_AESTHEMOS_mean, Relaxation_1_AESTHEMOS_sd,
+         Relaxation_2_AESTHEMOS_mean, Relaxation_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Relaxation = (`Relaxation_1_AESTHEMOS_mean` + `Relaxation_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Relaxation = sqrt((`Relaxation_1_AESTHEMOS_sd`^2 + `Relaxation_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Calmed" = Relaxation_1_AESTHEMOS_mean) %>%
+  rename("SD_Calmed" = Relaxation_1_AESTHEMOS_sd) %>%
+  rename("Mean_Relaxed" = Relaxation_2_AESTHEMOS_mean) %>%
+  rename("SD_Relaxed" = Relaxation_2_AESTHEMOS_sd)
+
+Surprise <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Surprise_1_AESTHEMOS_mean, Surprise_1_AESTHEMOS_sd,
+         Surprise_2_AESTHEMOS_mean, Surprise_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Surprise = (`Surprise_1_AESTHEMOS_mean` + `Surprise_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Surprise = sqrt((`Surprise_1_AESTHEMOS_sd`^2 + `Surprise_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Baffled" = Surprise_1_AESTHEMOS_mean) %>%
+  rename("SD_Baffled" = Surprise_1_AESTHEMOS_sd) %>%
+  rename("Mean_Surprised" = Surprise_2_AESTHEMOS_mean) %>%
+  rename("SD_Surprised" = Surprise_2_AESTHEMOS_sd)
+
+Interest <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Interest_1_AESTHEMOS_mean, Interest_1_AESTHEMOS_sd,
+         Interest_2_AESTHEMOS_mean, Interest_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Interest = (`Interest_1_AESTHEMOS_mean` + `Interest_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Interest = sqrt((`Interest_1_AESTHEMOS_sd`^2 + `Interest_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Curious" = Interest_1_AESTHEMOS_mean) %>%
+  rename("SD_Curious" = Interest_1_AESTHEMOS_sd) %>%
+  rename("Mean_SparkedInterest" = Interest_2_AESTHEMOS_mean) %>%
+  rename("SD_SparkedInterest" = Interest_2_AESTHEMOS_sd)
+
+IntellectualChallenge <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         IntellectualChallenge_1_AESTHEMOS_mean, IntellectualChallenge_1_AESTHEMOS_sd,
+         IntellectualChallenge_2_AESTHEMOS_mean, IntellectualChallenge_2_AESTHEMOS_sd) %>%
+  mutate(Mean_IntellectualChallenge = (`IntellectualChallenge_1_AESTHEMOS_mean` + `IntellectualChallenge_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_IntellectualChallenge = sqrt((`IntellectualChallenge_1_AESTHEMOS_sd`^2 + `IntellectualChallenge_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Challenged" = IntellectualChallenge_1_AESTHEMOS_mean) %>%
+  rename("SD_Challenged" = IntellectualChallenge_1_AESTHEMOS_sd) %>%
+  rename("Mean_Engaged" = IntellectualChallenge_2_AESTHEMOS_mean) %>%
+  rename("SD_Engaged" = IntellectualChallenge_2_AESTHEMOS_sd)
+
+Insight <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Insight_1_AESTHEMOS_mean, Insight_1_AESTHEMOS_sd,
+         Insight_2_AESTHEMOS_mean, Insight_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Insight = (`Insight_1_AESTHEMOS_mean` + `Insight_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Insight = sqrt((`Insight_1_AESTHEMOS_sd`^2 + `Insight_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_SuddenInsight" = Insight_1_AESTHEMOS_mean) %>%
+  rename("SD_SuddenInsight" = Insight_1_AESTHEMOS_sd) %>%
+  rename("Mean_DeeperMeaning" = Insight_2_AESTHEMOS_mean) %>%
+  rename("SD_DeeperMeaning" = Insight_2_AESTHEMOS_sd)
+
+FeelingOfUgliness <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         FeelingOfUgliness_1_AESTHEMOS_mean, FeelingOfUgliness_1_AESTHEMOS_sd,
+         FeelingOfUgliness_2_AESTHEMOS_mean, FeelingOfUgliness_2_AESTHEMOS_sd) %>%
+  mutate(Mean_FeelingOfUgliness = (`FeelingOfUgliness_1_AESTHEMOS_mean` + `FeelingOfUgliness_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_FeelingOfUgliness = sqrt((`FeelingOfUgliness_1_AESTHEMOS_sd`^2 + `FeelingOfUgliness_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Distasteful" = FeelingOfUgliness_1_AESTHEMOS_mean) %>%
+  rename("SD_Distasteful" = FeelingOfUgliness_1_AESTHEMOS_sd) %>%
+  rename("Mean_Ugly" = FeelingOfUgliness_2_AESTHEMOS_mean) %>%
+  rename("SD_Ugly" = FeelingOfUgliness_2_AESTHEMOS_sd)
+
+Boredom <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Boredom_1_AESTHEMOS_mean, Boredom_1_AESTHEMOS_sd,
+         Boredom_2_AESTHEMOS_mean, Boredom_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Boredom = (`Boredom_1_AESTHEMOS_mean` + `Boredom_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Boredom = sqrt((`Boredom_1_AESTHEMOS_sd`^2 + `Boredom_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Indifferent" = Boredom_1_AESTHEMOS_mean) %>%
+  rename("SD_Indifferent" = Boredom_1_AESTHEMOS_sd) %>%
+  rename("Mean_Bored" = Boredom_2_AESTHEMOS_mean) %>%
+  rename("SD_Bored" = Boredom_2_AESTHEMOS_sd)
+
+Confusion <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Confusion_1_AESTHEMOS_mean, Confusion_1_AESTHEMOS_sd,
+         Confusion_2_AESTHEMOS_mean, Confusion_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Confusion = (`Confusion_1_AESTHEMOS_mean` + `Confusion_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Confusion = sqrt((`Confusion_1_AESTHEMOS_sd`^2 + `Confusion_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Confused" = Confusion_1_AESTHEMOS_mean) %>%
+  rename("SD_Confused" = Confusion_1_AESTHEMOS_sd) %>%
+  rename("Mean_Unsettling" = Confusion_2_AESTHEMOS_mean) %>%
+  rename("SD_Unsettling" = Confusion_2_AESTHEMOS_sd)
+
+Anger <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Anger_1_AESTHEMOS_mean, Anger_1_AESTHEMOS_sd,
+         Anger_2_AESTHEMOS_mean, Anger_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Anger = (`Anger_1_AESTHEMOS_mean` + `Anger_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Anger = sqrt((`Anger_1_AESTHEMOS_sd`^2 + `Anger_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Aggressive" = Anger_1_AESTHEMOS_mean) %>%
+  rename("SD_Aggressive" = Anger_1_AESTHEMOS_sd) %>%
+  rename("Mean_Angry" = Anger_2_AESTHEMOS_mean) %>%
+  rename("SD_Angry" = Anger_2_AESTHEMOS_sd)
+
+Uneasiness <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Uneasiness_1_AESTHEMOS_mean, Uneasiness_1_AESTHEMOS_sd,
+         Uneasiness_2_AESTHEMOS_mean, Uneasiness_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Uneasiness = (`Uneasiness_1_AESTHEMOS_mean` + `Uneasiness_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Uneasiness = sqrt((`Uneasiness_1_AESTHEMOS_sd`^2 + `Uneasiness_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Worried" = Uneasiness_1_AESTHEMOS_mean) %>%
+  rename("SD_Worried" = Uneasiness_1_AESTHEMOS_sd) %>%
+  rename("Mean_Oppressive" = Uneasiness_2_AESTHEMOS_mean) %>%
+  rename("SD_Oppressive" = Uneasiness_2_AESTHEMOS_sd)
+
+Sadness <- ThemesAESTHEMOS_DF_Pivot %>%
+  select(Thematic, `Yes/No`,
+         Sadness_1_AESTHEMOS_mean, Sadness_1_AESTHEMOS_sd,
+         Sadness_2_AESTHEMOS_mean, Sadness_2_AESTHEMOS_sd) %>%
+  mutate(Mean_Sadness = (`Sadness_1_AESTHEMOS_mean` + `Sadness_2_AESTHEMOS_mean`)/2) %>%
+  mutate(PooledSD_Sadness = sqrt((`Sadness_1_AESTHEMOS_sd`^2 + `Sadness_2_AESTHEMOS_sd`^2)/2)) %>%
+  rename("Mean_Sad" = Sadness_1_AESTHEMOS_mean) %>%
+  rename("SD_Sad" = Sadness_1_AESTHEMOS_sd) %>%
+  rename("Mean_Melancholic" = Sadness_2_AESTHEMOS_mean) %>%
+  rename("SD_Melancholic" = Sadness_2_AESTHEMOS_sd)
+
+```
+
+<!---
+### Feeling Of Beauty
+
+`r knitr::kable(FeelingOfBeauty)`
+
+### Fascination
+
+`r knitr::kable(Fascination)`
+
+### Being Moved
+
+`r knitr::kable(BeingMoved)`
+
+### Awe
+
+`r knitr::kable(Awe)`
+
+### Enchantment
+
+`r knitr::kable(Enchantment)`
+
+### Nostalgia
+
+`r knitr::kable(Nostalgia)`
+
+### Joy
+
+`r knitr::kable(Joy)`
+
+### Humor
+
+`r knitr::kable(Humor)`
+
+### Vitality
+`r knitr::kable(Vitality)`
+
+### Energy
+
+`r knitr::kable(Energy)`
+
+### Relaxation
+
+`r knitr::kable(Relaxation)`
+
+### Surprise
+
+`r knitr::kable(Surprise)`
+
+### Interest
+
+`r knitr::kable(Interest)`
+
+### Intellectual Challenge
+
+`r knitr::kable(IntellectualChallenge)`
+
+### Insight
+
+`r knitr::kable(Insight)`
+
+### Feeling Of Ugliness
+
+`r knitr::kable(FeelingOfUgliness)`
+
+### Boredom
+
+`r knitr::kable(Boredom)`
+
+### Confusion
+
+`r knitr::kable(Confusion)`
+
+### Anger
+
+`r knitr::kable(Anger)`
+
+### Uneasiness
+
+`r knitr::kable(Uneasiness)`
+
+### Sadness
+
+`r knitr::kable(Sadness)`
+
+--->
+
+## Thematic AESTHEMOS Profiles
+
+We studied the AESTHEMOS profiles of the different themes.
+
+```{r}
+Profile_DF <- ThemesAESTHEMOS_DF_Pivot %>%
+  #filter(`Yes/No` == 1) %>%
+  select(Thematic, `Yes/No`, ends_with("_mean"))
+  
+Profile_DF_Melted <- melt(Profile_DF, measure.vars = c(3:44))
+
+Profile_DF_Melted$variable <- as.factor(Profile_DF_Melted$variable)
+
+#Reordering AESTHEMOS Dimensions for Graph
+Profile_DF_Melted$variable <- fct_relevel(Profile_DF_Melted$variable,
+                                          #Negative Emotions
+                                          "FeelingOfUgliness_1_AESTHEMOS_mean", "FeelingOfUgliness_2_AESTHEMOS_mean",
+                                          "Confusion_1_AESTHEMOS_mean", "Confusion_2_AESTHEMOS_mean",
+                                          "Anger_1_AESTHEMOS_mean", "Anger_2_AESTHEMOS_mean",
+                                          "Boredom_1_AESTHEMOS_mean", "Boredom_2_AESTHEMOS_mean",
+                                          "Uneasiness_1_AESTHEMOS_mean", "Uneasiness_2_AESTHEMOS_mean",
+                                          #Prototypical Aesthetic Emotions
+                                          "BeingMoved_1_AESTHEMOS_mean", "BeingMoved_2_AESTHEMOS_mean",
+                                          "Surprise_1_AESTHEMOS_mean", "Surprise_2_AESTHEMOS_mean",
+                                          "Fascination_1_AESTHEMOS_mean", "Fascination_2_AESTHEMOS_mean",
+                                          "FeelingOfBeauty_1_AESTHEMOS_mean", "FeelingOfBeauty_2_AESTHEMOS_mean",
+                                          "Awe_1_AESTHEMOS_mean", "Awe_2_AESTHEMOS_mean",
+                                          #Epistemic Emotions
+                                          "IntellectualChallenge_1_AESTHEMOS_mean", "IntellectualChallenge_2_AESTHEMOS_mean",
+                                          "Interest_1_AESTHEMOS_mean", "Interest_2_AESTHEMOS_mean",
+                                          "Insight_1_AESTHEMOS_mean", "Insight_2_AESTHEMOS_mean",
+                                          #Animation
+                                          "Energy_1_AESTHEMOS_mean", "Energy_2_AESTHEMOS_mean",
+                                          "Vitality_1_AESTHEMOS_mean", "Vitality_2_AESTHEMOS_mean",
+                                          "Enchantment_1_AESTHEMOS_mean", "Enchantment_2_AESTHEMOS_mean",
+                                          #Nostalgia
+                                          "Nostalgia_1_AESTHEMOS_mean", "Nostalgia_2_AESTHEMOS_mean",
+                                          "Relaxation_1_AESTHEMOS_mean", "Relaxation_2_AESTHEMOS_mean",
+                                          #Sadness
+                                          "Sadness_1_AESTHEMOS_mean", "Sadness_2_AESTHEMOS_mean",
+                                          #Amusement
+                                          "Humor_1_AESTHEMOS_mean", "Humor_2_AESTHEMOS_mean",
+                                          "Joy_1_AESTHEMOS_mean", "Joy_2_AESTHEMOS_mean"
+                                          )
+
+Profile_total <- ggplot(Profile_DF_Melted%>%filter(`Yes/No`==1), aes(x=variable, y=value)) +
+  geom_line(aes(group=Thematic, color=Thematic)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ylim(1,5) +
+  annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=6, y=4.9,  label="Negative Emotions") +
+  annotate("rect", xmin=10.75, xmax=20.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=15.5, y=4.9,  label="Prototypical Aesthetic Emotions") +
+  annotate("rect", xmin=20.75, xmax=26.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=23.5, y=4.9,  label="Epistemic Emotions") +
+  annotate("rect", xmin=26.75, xmax=32.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=29.5, y=4.9,  label="Animation") +
+  annotate("rect", xmin=32.75, xmax=36.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=34.5, y=4.9,  label="Nostalgia/Relaxation") +
+  annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=37.5, y=4.9,  label="Sadness") +
+  annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=40.5, y=4.9,  label="Amusement")
+
+
+Profile_ThinkBeauty <- ggplot(Profile_DF_Melted%>%filter(`Yes/No`==1) %>% filter(Thematic=="The Thinks (19)" | Thematic=="Visual Beauty (37)"), 
+       aes(x=variable, y=value)) +
+  geom_line(aes(group=Thematic, color=Thematic)) +
+  scale_color_manual(values=c("purple","pink")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ylim(1,5) +
+  annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=6, y=4.9,  label="Negative Emotions") +
+  annotate("rect", xmin=10.75, xmax=20.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=15.5, y=4.9,  label="Prototypical Aesthetic Emotions") +
+  annotate("rect", xmin=20.75, xmax=26.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=23.5, y=4.9,  label="Epistemic Emotions") +
+  annotate("rect", xmin=26.75, xmax=32.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=29.5, y=4.9,  label="Animation") +
+  annotate("rect", xmin=32.75, xmax=36.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=34.5, y=4.9,  label="Nostalgia/Relaxation") +
+  annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=37.5, y=4.9,  label="Sadness") +
+  annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=40.5, y=4.9,  label="Amusement")
+
+#ggplot(Profile_DF_Melted%>%filter(Thematic=="visual beauty"), aes(x=variable, y=value)) +
+#  geom_line(aes(group=`Yes/No`, color=`Yes/No`)) +
+#  scale_color_manual(values=c("purple","pink")) +
+#  theme_minimal() +
+#  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+#  ylim(1,5) +
+#  annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=6, y=4.9,  label="Negative Emotions") +
+#  annotate("rect", xmin=10.75, xmax=20.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=16.5, y=4.9,  label="Prototypical Aesthetic Emotions") +
+#  annotate("rect", xmin=20.75, xmax=26.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=23.5, y=4.9,  label="Epistemic Emotions") +
+#  annotate("rect", xmin=26.75, xmax=32.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=29.5, y=4.9,  label="Animation") +
+#  annotate("rect", xmin=32.75, xmax=36.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=34.5, y=4.9,  label="Nostalgia/Relaxation") +
+#  annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=37.5, y=4.9,  label="Sadness") +
+#  annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=40.5, y=4.9,  label="Amusement")
+
+
+```
+
+```{r, fig.width=16, fig.height=10}
+plot(Profile_total)
+```
+
+Only "The Think" and "Visual Beauty"
+
+```{r, fig.width=16, fig.height=10}
+plot(Profile_ThinkBeauty)
+```
