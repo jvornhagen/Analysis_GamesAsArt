@@ -84,7 +84,7 @@ DataSet_Cleaned$`LongAgo. How_long_ago_di.._`[DataSet_Cleaned$`GamesAsArt?Y/N` =
 
 
 
-##__Creating Network Analysis DataSet__##
+##__Creating Latent Class Analysis DataSet__##
 ```{r}
 ##Extract all the relevant Columns for the network analysis
 DataSet_NetworkAnalysis <- DataSet_Cleaned %>%
@@ -99,7 +99,7 @@ DataSet_NetworkAnalysis <- DataSet_Cleaned %>%
 
 
 ##Save DataSet as CSV in folder MainAnalyses/NetworkAnalysis
-write.csv(DataSet_NetworkAnalysis, file = "../MainAnalyses/NetworkAnalysis/NetworkAnalysis_DataFile.csv")
+write.csv(DataSet_NetworkAnalysis, file = "../MainAnalyses/LatentClassAnalysis/NetworkAnalysis_DataFile.csv")
 ```
 
 ##_Creating Qualitative Data Analysis DataSet__#
@@ -127,5 +127,5 @@ write.csv(DataSet_Qualitative, file = "../MainAnalyses/QualitativeAnalysis/Quali
 DataSet_Descriptive <- DataSet_Cleaned;
 
 ##Save DataSet as CSV in Folder
-write.csv(DataSet_Descriptive, file = "../MainAnalyses/DescriptiveAnalysis/DescriptiveAnalysis_DataFile.csv")
+write.csv(DataSet_Descriptive, file = "../MainAnalyses/DescriptiveHollisticAnalysis/DescriptiveAnalysis_DataFile.csv")
 ```

@@ -1,11 +1,12 @@
 ---
-title: "Descriptive Analysis"
+title: "Combined Analysis"
 author: "Anonymous"
 date: "13 8 2020"
-output: 
+output:
+  pdf_document: default
   html_document:
     theme: sandstone
-editor_options: 
+editor_options:
   chunk_output_type: console
 ---
 
@@ -14,7 +15,7 @@ editor_options:
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
 
-This doc gives some exploratory insight into the DataSet
+This doc gives some exploratory insight into the DataSet, the Latent class analysis as well as the qualitative Analysis
 
 
 ```{r  include=FALSE}
@@ -27,9 +28,10 @@ if(!require(summarytools)){install.packages('summarytools')}
 if(!require(patchwork)){install.packages('patchwork')}
 if(!require(psy)){install.packages('psy')}
 library(tidyverse, summarytools, patchwork)
+library(psy)
 
-##Set Working DIR so Input&Output is correct
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+##Set Working DIR so Input&Output is correct (uncomment when running chunk directly. When knitted this lne should be standard behavior)
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 ##Import Data Set
 DataSet <- read_csv("DescriptiveAnalysis_DataFile.csv")
@@ -45,8 +47,9 @@ DataSet <- read_csv("DescriptiveAnalysis_DataFile.csv")
 
 A total of *n=*`r nrow(DataSet)` completed the questionnaire at least to the point of the bonus questions.
 
+# Analyses
 
-# Demographics:
+## Demographics:
 ```{r}
 FreqAge <- DataSet %>%
   descr(var = `Age. How_old_are_you?`, stats = c("mean", "Sd"))
@@ -69,6 +72,7 @@ LabelsWithN <- c(
 )
   
 d1 <- DataSet %>%
+  #rename manually from "LabelsWithN" becaue fct_recode does not play well with parse or sprintf
   mutate(`Gender. What_is_your_ge.._` = fct_recode(`Gender. What_is_your_ge.._`, "Man(105)" = "Man", "Woman(51)" = "Woman", "Non-Binary(12)" = "Non-Binary", "Other(4)" = "Other", "Prefer Not \n To Disclose(2)" = "Prefer not to disclose")) %>%
   ggplot(aes(x = `Gender. What_is_your_ge.._` , y = `Age. How_old_are_you?`, main = "Age Distribution By Gender")) +
     geom_violin() +
@@ -96,7 +100,7 @@ d1+d2 +
 ```
 
 
-# The Experience of Videogames as Art.
+## The Experience of Videogames as Art.
 ```{r}
 #Separate DataSet into Yes to VGasArt as Art and NoVGasArt
 
@@ -395,9 +399,9 @@ When asked where in the game the experience happened, many participants indicate
 
 
 
-# Descriptives for the AESTHEMOS
+## Descriptives for the AESTHEMOS
 
-## General Descriptive AESTHEMOS Data
+### General Descriptive AESTHEMOS Data
 
 The following tables feature the Mean and SD of each Item and Subscale of the AESTHEMOS
 ```{r}
@@ -625,7 +629,7 @@ DataSetX <- DataSet %>%
 ```
 Tables for the AESTHEMOS Items:
 
-### 1: Feeling Of Beauty
+#### 1: Feeling Of Beauty
 `r knitr::kable(FeelingOfBeautyDescript)`
 ```{r}
 PI1_1 <-ggplot(DataSetX, aes(x="I Liked It", y=FeelingOfBeauty_1_AESTHEMOS)) +
@@ -651,7 +655,7 @@ PI1_1+PI2_1+PS_1 +
 ```
 
 
-### 2: Fascination
+#### 2: Fascination
 `r knitr::kable(FascinationDescript)`
 ```{r}
 PI1_2 <-ggplot(DataSetX, aes(x="I was impressed", y=Fascination_1_AESTHEMOS)) +
@@ -676,7 +680,7 @@ PI1_2+PI2_2+PS_2 +
   plot_annotation(title = "Fascination")
 ```
 
-### 3: Being Moved
+#### 3: Being Moved
 `r knitr::kable(BeingMovedDescript)`
 ```{r}
 PI1_3 <-ggplot(DataSetX, aes(x="I felt deeply moved", y=BeingMoved_1_AESTHEMOS)) +
@@ -701,7 +705,7 @@ PI1_3+PI2_3+PS_3 +
   plot_annotation(title = "Being Moved")
 ```
 
-### 4: Awe
+#### 4: Awe
 `r knitr::kable(AweDescript)`
 ```{r}
 PI1_4 <-ggplot(DataSetX, aes(x="I found it sublime", y=Awe_1_AESTHEMOS)) +
@@ -726,7 +730,7 @@ PI1_4+PI2_4+PS_4 +
   plot_annotation(title = "Awe")
 ```
 
-### 5: Enchantment
+#### 5: Enchantment
 `r knitr::kable(EnchantmentDescript)`
 ```{r}
 PI1_5 <-ggplot(DataSetX, aes(x="I felt something wonderful", y=Enchantment_1_AESTHEMOS)) +
@@ -751,7 +755,7 @@ PI1_5+PI2_5+PS_5 +
   plot_annotation(title = "Enchantment")
 ```
 
-### 6: Nostalgia
+#### 6: Nostalgia
 `r knitr::kable(NostalgiaDescript)`
 ```{r}
 PI1_6 <-ggplot(DataSetX, aes(x="It made me feel nostalgic", y=Nostalgia_1_AESTHEMOS)) +
@@ -776,7 +780,7 @@ PI1_6+PI2_6+PS_6 +
   plot_annotation(title = "Nostalgia")
 ```
 
-### 7: Joy
+#### 7: Joy
 `r knitr::kable(JoyDescript)`
 ```{r}
 PI1_7 <-ggplot(DataSetX, aes(x="It delighted me", y=Joy_1_AESTHEMOS)) +
@@ -801,7 +805,7 @@ PI1_7+PI2_7+PS_7 +
   plot_annotation(title = "Joy")
 ```
 
-### 8: Humor
+#### 8: Humor
 `r knitr::kable(HumorDescript)`
 ```{r}
 PI1_8 <-ggplot(DataSetX, aes(x="It amused me", y=Humor_1_AESTHEMOS)) +
@@ -826,7 +830,7 @@ PI1_8+PI2_8+PS_8 +
   plot_annotation(title = "Humor")
 ```
 
-### 9: Vitality
+#### 9: Vitality
 `r knitr::kable(VitalityDescript)`
 ```{r}
 PI1_9 <-ggplot(DataSetX, aes(x="It spurred me on", y=Vitality_1_AESTHEMOS)) +
@@ -851,7 +855,7 @@ PI1_9+PI2_9+PS_9 +
   plot_annotation(title = "Vitality")
 ```
 
-### 10: Energy
+#### 10: Energy
 `r knitr::kable(EnergyDescript)`
 ```{r}
 PI1_10 <-ggplot(DataSetX, aes(x="It motivated me to act", y=Energy_1_AESTHEMOS)) +
@@ -876,7 +880,7 @@ PI1_10+PI2_10+PS_10 +
   plot_annotation(title = "Energy")
 ```
 
-### 11: Relaxation
+#### 11: Relaxation
 `r knitr::kable(RelaxationDescript)`
 ```{r}
 PI1_11 <-ggplot(DataSetX, aes(x="It calmed me", y=Relaxation_1_AESTHEMOS)) +
@@ -901,7 +905,7 @@ PI1_11+PI2_11+PS_11 +
   plot_annotation(title = "Relaxation")
 ```
 
-### 12: Surprise
+#### 12: Surprise
 `r knitr::kable(SurpriseDescript)`
 ```{r}
 PI1_12 <-ggplot(DataSetX, aes(x="It baffled me", y=Surprise_1_AESTHEMOS)) +
@@ -926,7 +930,7 @@ PI1_12+PI2_12+PS_12 +
   plot_annotation(title = "Surprise")
 ```
 
-### 13: Interest
+#### 13: Interest
 `r knitr::kable(InterestDescript)`
 ```{r}
 PI1_13 <-ggplot(DataSetX, aes(x="Made me Curious", y=Interest_1_AESTHEMOS)) +
@@ -951,7 +955,7 @@ PI1_13+PI2_13+PS_13 +
   plot_annotation(title = "Interest")
 ```
 
-### 14: Intellectual Challenge
+#### 14: Intellectual Challenge
 `r knitr::kable(IntellectualChallengeDescript)`
 ```{r}
 PI1_14 <-ggplot(DataSetX, aes(x="It Challenged me intellectually", y=IntellectualChallenge_1_AESTHEMOS)) +
@@ -976,7 +980,7 @@ PI1_14+PI2_14+PS_14 +
   plot_annotation(title = "Intellectual Challenge")
 ```
 
-### 15: Insight
+#### 15: Insight
 `r knitr::kable(InsightDescript)`
 ```{r}
 PI1_15 <-ggplot(DataSetX, aes(x="I felt a sudden insight", y=Insight_1_AESTHEMOS)) +
@@ -1001,7 +1005,7 @@ PI1_15+PI2_15+PS_15 +
   plot_annotation(title = "Insight")
 ```
 
-### 16: Feeling of Ugliness
+#### 16: Feeling of Ugliness
 `r knitr::kable(FeelingOfUglinessDescript)`
 ```{r}
 PI1_16 <-ggplot(DataSetX, aes(x="I found it distasteful", y=FeelingOfUgliness_1_AESTHEMOS)) +
@@ -1026,7 +1030,7 @@ PI1_16+PI2_16+PS_16 +
   plot_annotation(title = "Feeling Of Ugliness")
 ```
 
-### 16: Boredom
+#### 16: Boredom
 `r knitr::kable(BoredomDescript)`
 ```{r}
 PI1_16 <-ggplot(DataSetX, aes(x="I felt indifferent", y=Boredom_1_AESTHEMOS)) +
@@ -1051,7 +1055,7 @@ PI1_16+PI2_16+PS_16 +
   plot_annotation(title = "Boredom")
 ```
 
-### 18: Confusion
+#### 18: Confusion
 `r knitr::kable(ConfusionDescript)`
 ```{r}
 PI1_18 <-ggplot(DataSetX, aes(x="I felt confused", y=Confusion_1_AESTHEMOS)) +
@@ -1077,7 +1081,7 @@ PI1_18+PI2_18+PS_18 +
 ```
 
 
-### 19: Anger
+#### 19: Anger
 `r knitr::kable(AngerDescript)`
 ```{r}
 PI1_19 <-ggplot(DataSetX, aes(x="It made me aggressive", y=Anger_1_AESTHEMOS)) +
@@ -1102,7 +1106,7 @@ PI1_19+PI2_19+PS_19 +
   plot_annotation(title = "Anger")
 ```
 
-### 20: Uneasiness
+#### 20: Uneasiness
 `r knitr::kable(UneasinessDescript)`
 ```{r}
 PI1_20 <-ggplot(DataSetX, aes(x="It worried me", y=Uneasiness_1_AESTHEMOS)) +
@@ -1127,7 +1131,7 @@ PI1_20+PI2_20+PS_20 +
   plot_annotation(title = "Uneasiness")
 ```
 
-### 21: Sadness
+#### 21: Sadness
 `r knitr::kable(SadnessDescript)`
 ```{r}
 PI1_21 <-ggplot(DataSetX, aes(x="It made me sad", y=Sadness_1_AESTHEMOS)) +
@@ -1153,7 +1157,7 @@ PI1_21+PI2_21+PS_21 +
 ```
 
 
-## Scale Reliablity
+### Scale Reliablity
 ```{r  echo=FALSE}
 Subscales <- c("Feeling of beauty", "Fascination","Being moved", "Awe", "Enchantment", "Nostalgia", "Joy", "Humor", "Vitality", "Energy", "Relaxation", "Surprise", "Interest", "Intellectual challenge", "Insight", "FeelingOfUgliness", "Boredom", "Confusion", "Anger", "Uneasiness", "Sadness")
 #Correlations in the Original Aesthemos (10.1371/journal.pone.0178899)
@@ -1243,7 +1247,7 @@ We computed Cronbach's \alpha and compared it to the reliability reported by Sch
 
 
 
-# Exploring Expertise
+## Exploring Expertise
 
 Expertise was measured via several measures:
 - For how long have they been playing (in Years)
@@ -1356,7 +1360,7 @@ p1+p2
 While people working with videogames barely differentiate themselves from the other participants, they report a slightly broader taste. However, given the vast different in sample size, this should be taken with a grain of salt.
 
 
-# The Absence of Videogames as Art.
+## The Absence of Videogames as Art.
 ```{r}
 freqOtherArt <- NoVGasArt %>%
   freq(`EXPInOtherArtYN. Did_you_ever_ex.._`)
