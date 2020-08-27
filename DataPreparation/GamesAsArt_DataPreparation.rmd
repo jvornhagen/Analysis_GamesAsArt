@@ -30,9 +30,9 @@ DataSet <- read_tsv("../RawData/RawData.csv")
 #__Renaming Columns__#
 ```{r}
 #Array for AESTHEMOS Names:
-AESTHEMOS1 <- c("IntellectualChallenge_1_AESTHEMOS","Relaxation_1_AESTHEMOS","FeelingOfBeauty_1_AESTHEMOS","Enchantment_1_AESTHEMOS","IntellectualChallenge_2_AESTHEMOS","FeelingOfUgliness_1_AESTHEMOS","BeingMoved_1_AESTHEMOS","Energy_1_AESTHEMOS","Enchantment_2_AESTHEMOS","Relaxation_2_AESTHEMOS","Humor_1_AESTHEMOS","Confusion_1_AESTHEMOS","Nostalgia_1_AESTHEMOS","Nostalgia_2_AESTHEMOS","Uneasiness_1_AESTHEMOS", "Vitality_1_AESTHEMOS", "Fascination_1_AESTHEMOS", "BeingMoved_2_AESTHEMOS", "Interest_2_AESTHEMOS", "Awe_1_AESTHEMOS", "Humor_2_AESTHEMOS")
+AESTHEMOS1 <- c("IntellectualChallenge_1_AESTHEMOS","Relaxation_1_AESTHEMOS","FeelingOfBeauty_1_AESTHEMOS","Enchantment_1_AESTHEMOS","IntellectualChallenge_2_AESTHEMOS","FeelingOfUgliness_2_AESTHEMOS","BeingMoved_1_AESTHEMOS","Energy_2_AESTHEMOS","Enchantment_2_AESTHEMOS","Relaxation_2_AESTHEMOS","Humor_1_AESTHEMOS","Confusion_1_AESTHEMOS","Nostalgia_2_AESTHEMOS","Nostalgia_1_AESTHEMOS","Uneasiness_2_AESTHEMOS", "Vitality_1_AESTHEMOS", "Fascination_1_AESTHEMOS", "BeingMoved_2_AESTHEMOS", "Interest_2_AESTHEMOS", "Awe_1_AESTHEMOS", "Humor_2_AESTHEMOS")
 
-AESTHEMOS2 <- c("FeelingOfBeauty_2_AESTHEMOS", "Joy_1_AESTHEMOS", "Interest_1_AESTHEMOS", "Fascination_2_AESTHEMOS", "Vitality_2_AESTHEMOS", "Surprise_1_AESTHEMOS", "Insight_1_AESTHEMOS", "Sadness_1_AESTHEMOS", "Anger_1_AESTHEMOS", "Boredom_1_AESTHEMOS", "Insight_2_AESTHEMOS", "Sadness_2_AESTHEMOS", "Anger_2_AESTHEMOS", "Uneasiness_2_AESTHEMOS", "Surprise_2_AESTHEMOS", "Awe_2_AESTHEMOS", "Boredom_2_AESTHEMOS", "FeelingOfUgliness_2_AESTHEMOS", "Confusion_2_AESTHEMOS", "Joy_2_AESTHEMOS", "Energy_2_AESTHEMOS")
+AESTHEMOS2 <- c("FeelingOfBeauty_2_AESTHEMOS", "Joy_1_AESTHEMOS", "Interest_1_AESTHEMOS", "Fascination_2_AESTHEMOS", "Vitality_2_AESTHEMOS", "Surprise_1_AESTHEMOS", "Insight_1_AESTHEMOS", "Sadness_1_AESTHEMOS", "Anger_1_AESTHEMOS", "Boredom_1_AESTHEMOS", "Insight_2_AESTHEMOS", "Sadness_2_AESTHEMOS", "Anger_2_AESTHEMOS", "Uneasiness_1_AESTHEMOS", "Surprise_2_AESTHEMOS", "Awe_2_AESTHEMOS", "Boredom_2_AESTHEMOS", "FeelingOfUgliness_1_AESTHEMOS", "Confusion_2_AESTHEMOS", "Joy_2_AESTHEMOS", "Energy_1_AESTHEMOS")
 
 DataSet <- DataSet %>%
   rename("GamesAsArt?Y/N"=`Task. Did_you_ever_ex.._`) %>%
