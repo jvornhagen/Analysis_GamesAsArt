@@ -30,9 +30,9 @@ DataSet <- read_tsv("../RawData/RawData.csv")
 #__Renaming Columns__#
 ```{r}
 #Array for AESTHEMOS Names:
-AESTHEMOS1 <- c("IntellectualChallenge_1_AESTHEMOS","Relaxation_1_AESTHEMOS","FeelingOfBeauty_1_AESTHEMOS","Enchantment_1_AESTHEMOS","IntellectualChallenge_2_AESTHEMOS","FeelingOfUgliness_1_AESTHEMOS","BeingMoved_1_AESTHEMOS","Energy_1_AESTHEMOS","Enchantment_2_AESTHEMOS","Relaxation_2_AESTHEMOS","Humor_1_AESTHEMOS","Confusion_1_AESTHEMOS","Nostalgia_1_AESTHEMOS","Nostalgia_2_AESTHEMOS","Uneasiness_1_AESTHEMOS", "Vitality_1_AESTHEMOS", "Fascination_1_AESTHEMOS", "BeingMoved_2_AESTHEMOS", "Interest_1_AESTHEMOS", "Awe_1_AESTHEMOS", "Humor_2_AESTHEMOS")
+AESTHEMOS1 <- c("IntellectualChallenge_1_AESTHEMOS","Relaxation_1_AESTHEMOS","FeelingOfBeauty_1_AESTHEMOS","Enchantment_1_AESTHEMOS","IntellectualChallenge_2_AESTHEMOS","FeelingOfUgliness_1_AESTHEMOS","BeingMoved_1_AESTHEMOS","Energy_1_AESTHEMOS","Enchantment_2_AESTHEMOS","Relaxation_2_AESTHEMOS","Humor_1_AESTHEMOS","Confusion_1_AESTHEMOS","Nostalgia_1_AESTHEMOS","Nostalgia_2_AESTHEMOS","Uneasiness_1_AESTHEMOS", "Vitality_1_AESTHEMOS", "Fascination_1_AESTHEMOS", "BeingMoved_2_AESTHEMOS", "Interest_2_AESTHEMOS", "Awe_1_AESTHEMOS", "Humor_2_AESTHEMOS")
 
-AESTHEMOS2 <- c("FeelingOfBeauty_2_AESTHEMOS", "Joy_1_AESTHEMOS", "Interest_2_AESTHEMOS", "Fascination_2_AESTHEMOS", "Vitality_2_AESTHEMOS", "Surprise_1_AESTHEMOS", "Insight_1_AESTHEMOS", "Sadness_1_AESTHEMOS", "Anger_1_AESTHEMOS", "Boredom_1_AESTHEMOS", "Insight_2_AESTHEMOS", "Sadness_2_AESTHEMOS", "Anger_2_AESTHEMOS", "Uneasiness_2_AESTHEMOS", "Surprise_2_AESTHEMOS", "Awe_2_AESTHEMOS", "Boredom_2_AESTHEMOS", "FeelingOfUgliness_2_AESTHEMOS", "Confusion_2_AESTHEMOS", "Joy_2_AESTHEMOS", "Energy_2_AESTHEMOS")
+AESTHEMOS2 <- c("FeelingOfBeauty_2_AESTHEMOS", "Joy_1_AESTHEMOS", "Interest_1_AESTHEMOS", "Fascination_2_AESTHEMOS", "Vitality_2_AESTHEMOS", "Surprise_1_AESTHEMOS", "Insight_1_AESTHEMOS", "Sadness_1_AESTHEMOS", "Anger_1_AESTHEMOS", "Boredom_1_AESTHEMOS", "Insight_2_AESTHEMOS", "Sadness_2_AESTHEMOS", "Anger_2_AESTHEMOS", "Uneasiness_2_AESTHEMOS", "Surprise_2_AESTHEMOS", "Awe_2_AESTHEMOS", "Boredom_2_AESTHEMOS", "FeelingOfUgliness_2_AESTHEMOS", "Confusion_2_AESTHEMOS", "Joy_2_AESTHEMOS", "Energy_2_AESTHEMOS")
 
 DataSet <- DataSet %>%
   rename("GamesAsArt?Y/N"=`Task. Did_you_ever_ex.._`) %>%
@@ -65,6 +65,36 @@ DataSet_RM <- DataSet %>%
   filter(!`Age. How_old_are_you?`<18) %>%
   #Removing anyone with an English level <3
   filter(`EnglishLevel. On_a_scale_from.._`>2)
+
+DataSet_Removed_Lastpage <- DataSet %>%
+  filter(`lastpage. Last_page`<10)
+
+DataSet_Removed_Consent <- DataSet %>%
+  #Removing all Test Data (Any "participant" coming from the Lime Survey Admin Page)#
+  filter(str_detect(`refurl. Referrer_URL`, "admin", negate = TRUE)) %>%
+  #Removing all people who didn't finish (I.e., ended before the check for bonus questions (page 10))
+  filter(`lastpage. Last_page`>=10) %>%
+  #Removing anybody who did not give consent
+  filter(!`InformedConsent[IC1]. Informed_Consen..__[I_have_read_and.._]` =="Yes" | 
+           !`InformedConsent[IC2]. Informed_Consen..__[I_agree_to_part.._]`=="Yes" | 
+           !`InformedConsent[IC3]. Informed_Consen..__[I_understand_th.._]`=="Yes" | 
+           !`InformedConsent[IC4]. Informed_Consen..__[I_understand_th.._]`=="Yes" | 
+           !`InformedConsent[IC5]. Informed_Consen..__[I_understand_an.._]`=="Yes")
+
+DataSet_Removed_Age <- DataSet %>%
+  #Removing all Test Data (Any "participant" coming from the Lime Survey Admin Page)#
+  filter(str_detect(`refurl. Referrer_URL`, "admin", negate = TRUE)) %>%
+  #Removing all people who didn't finish (I.e., ended before the check for bonus questions (page 10))
+  filter(`lastpage. Last_page`>=10) %>%
+  #Removing anybody who did not give consent
+  filter(`InformedConsent[IC1]. Informed_Consen..__[I_have_read_and.._]` =="Yes" & 
+           `InformedConsent[IC2]. Informed_Consen..__[I_agree_to_part.._]`=="Yes" & 
+           `InformedConsent[IC3]. Informed_Consen..__[I_understand_th.._]`=="Yes" & 
+           `InformedConsent[IC4]. Informed_Consen..__[I_understand_th.._]`=="Yes" & 
+           `InformedConsent[IC5]. Informed_Consen..__[I_understand_an.._]`=="Yes") %>%
+  filter(`Age. How_old_are_you?` < 18 | 
+           !`InformedConsent[IC6]. Informed_Consen..__[I_am_at_least_1.._]`=="Yes")
+  
 ```
 
 #__Removing Junk Columns__#
