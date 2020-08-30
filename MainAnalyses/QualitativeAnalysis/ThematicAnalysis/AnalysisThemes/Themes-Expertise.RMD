@@ -143,6 +143,92 @@ ggplot(JobExpert_DF_Pivot, aes(`Theme`, percent, fill = OccupationVG)) +
   coord_flip()
   
 
+##Professional Expertise
+Professionals_DF <- ThemesExpertise_DF %>%
+  select(14,15,3:9) %>%
+  mutate(expert = ifelse(OccupationVG == "Yes" & OccupationArt == "Yes", "Both",
+                         ifelse(OccupationVG == "Yes" & OccupationArt == "No", "VG Professional",
+                                ifelse(OccupationVG == "No" & OccupationArt == "Yes", "Art Professional",
+                                       ifelse(OccupationVG == "No" & OccupationArt == "No","Laiperson",NA))))) %>%
+  select(!1:2) %>%
+  group_by(expert)
+Professionals_DF_melted <- melt(Professionals_DF, measure.vars = c(1:7))
+
+
+Professionals_DF_summarized <- Professionals_DF_melted %>%
+  group_by(expert, variable) %>%
+  summarize(Sum = sum(value)) %>%
+  mutate(percent =
+           ifelse(expert=="Both", Sum*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG == "Yes" & OccupationArt == "Yes")),
+            ifelse(expert=="Art Professional", Sum*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG == "No" & OccupationArt == "Yes")),
+             ifelse(expert=="VG Professional", Sum*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG == "Yes" & OccupationArt == "No")),
+              ifelse(expert=="Laiperson", Sum*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG == "No" & OccupationArt == "No")),
+                     NA))))
+         )
+
+ggplot(Professionals_DF_summarized, aes(variable, percent, fill = expert)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  ggtitle("Professional Split") +
+  scale_fill_manual(name="Profession", values=c("#DD4613","#A71C49", "blue", "yellow")) +
+  ylim(0, 100) +
+  coord_flip()
+```
+
+
+Split by person identifying as a professional member of the games industry or the art industry and by people who identify as neither:
+
+```{r}
+
+##All Professionals
+Professionals_DF <- ThemesExpertise_DF %>%
+  select(14,15,3:9) %>%
+  mutate(expert = ifelse(OccupationVG == "Yes" & OccupationArt == "Yes", "Professional",
+                         ifelse(OccupationVG == "Yes" & OccupationArt == "No", "Professional",
+                                ifelse(OccupationVG == "No" & OccupationArt == "Yes", "Professional",
+                                       ifelse(OccupationVG == "No" & OccupationArt == "No","Laiperson",NA))))) %>%
+  select(!1:2) %>%
+  group_by(expert)
+
+Professionals_DF_melted <- melt(Professionals_DF, measure.vars = c(1:7))
+
+Professionals_DF_summarized <- Professionals_DF_melted %>%
+  group_by(expert, variable) %>%
+  summarize(Sum = sum(value)) %>%
+  mutate(percent =
+           ifelse(expert=="Professional", Sum*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG != "No" | OccupationArt != "No")),
+              ifelse(expert=="Laiperson", Sum*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG == "No" & OccupationArt == "No")),
+                     NA))
+         )
+
+#Annotations for differences and Y positions
+
+annotationsProfessionals <- as.numeric(
+  c(Professionals_DF_summarized[8,4]-Professionals_DF_summarized[1,4],Professionals_DF_summarized[9,4]-Professionals_DF_summarized[2,4],Professionals_DF_summarized[10,4]-Professionals_DF_summarized[3,4],
+                 Professionals_DF_summarized[11,4]-Professionals_DF_summarized[4,4],Professionals_DF_summarized[12,4]-Professionals_DF_summarized[5,4],Professionals_DF_summarized[13,4]-Professionals_DF_summarized[6,4],
+                 Professionals_DF_summarized[14,4]-Professionals_DF_summarized[7,4]))
+
+yProfessionals <- c(as.numeric(Professionals_DF_summarized[8,4])+15, as.numeric(Professionals_DF_summarized[9,4])+15, as.numeric(Professionals_DF_summarized[10,4])+15,
+                             as.numeric(Professionals_DF_summarized[11,4])+15, as.numeric(Professionals_DF_summarized[12,4])+15,
+                             as.numeric(Professionals_DF_summarized[13,4])+15, as.numeric(Professionals_DF_summarized[7,4])+15)
+
+
+
+
+ggplot(Professionals_DF_summarized, aes(variable, percent, fill = expert)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  ggtitle("Professional Split") +
+  geom_signif(xmin=c(0.8, 1.8, 2.8, 3.8, 4.8, 5.8, 6.8), xmax=c(1.2,2.2,3.2,4.2,5.2,6.2,7.2),
+              y_position = yProfessionals,
+              annotation = round(annotationsProfessionals,2))+
+  scale_fill_manual(
+    labels=c(paste("Layperson (", nrow(Professionals_DF %>% filter(expert=="Laiperson")), ")", sep=""), 
+             paste("Expert (", nrow(Professionals_DF %>% filter(expert=="Professional")), ")", sep="")),
+    name="Profession", values=c("#DD4613","#A71C49")) +
+  ylim(0, 100) +
+  coord_flip()
+
+
+
 ```
 
 ## Self Reported Expertise
