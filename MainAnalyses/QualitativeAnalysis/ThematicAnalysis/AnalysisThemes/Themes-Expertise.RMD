@@ -490,7 +490,6 @@ AESTHEMOS_DF <- AESTHEMOS_DF %>%
 
 #Combine with themes
 ThemesAESTHEMOS_DF <- full_join(Themes_DF,AESTHEMOS_DF, by="id..Response_ID")
-
 ```
 
 
@@ -749,93 +748,6 @@ Sadness <- ThemesAESTHEMOS_DF_Pivot %>%
 
 ```
 
-<!---
-### Feeling Of Beauty
-
-`r knitr::kable(FeelingOfBeauty)`
-
-### Fascination
-
-`r knitr::kable(Fascination)`
-
-### Being Moved
-
-`r knitr::kable(BeingMoved)`
-
-### Awe
-
-`r knitr::kable(Awe)`
-
-### Enchantment
-
-`r knitr::kable(Enchantment)`
-
-### Nostalgia
-
-`r knitr::kable(Nostalgia)`
-
-### Joy
-
-`r knitr::kable(Joy)`
-
-### Humor
-
-`r knitr::kable(Humor)`
-
-### Vitality
-`r knitr::kable(Vitality)`
-
-### Energy
-
-`r knitr::kable(Energy)`
-
-### Relaxation
-
-`r knitr::kable(Relaxation)`
-
-### Surprise
-
-`r knitr::kable(Surprise)`
-
-### Interest
-
-`r knitr::kable(Interest)`
-
-### Intellectual Challenge
-
-`r knitr::kable(IntellectualChallenge)`
-
-### Insight
-
-`r knitr::kable(Insight)`
-
-### Feeling Of Ugliness
-
-`r knitr::kable(FeelingOfUgliness)`
-
-### Boredom
-
-`r knitr::kable(Boredom)`
-
-### Confusion
-
-`r knitr::kable(Confusion)`
-
-### Anger
-
-`r knitr::kable(Anger)`
-
-### Uneasiness
-
-`r knitr::kable(Uneasiness)`
-
-### Sadness
-
-`r knitr::kable(Sadness)`
-
---->
-
-
 ```{r}
 Profile_DF <- ThemesAESTHEMOS_DF_Pivot %>%
   #filter(`Yes/No` == 1) %>%
@@ -876,50 +788,6 @@ Profile_DF_Melted$variable <- fct_relevel(Profile_DF_Melted$variable,
                                           "Humor_1_AESTHEMOS_mean", "Humor_2_AESTHEMOS_mean",
                                           "Joy_1_AESTHEMOS_mean", "Joy_2_AESTHEMOS_mean"
                                           )
-
-Profile_total <- ggplot(Profile_DF_Melted%>%filter(`Yes/No`==1), aes(x=variable, y=value)) +
-  geom_line(aes(group=Thematic, color=Thematic)) +
-  scale_color_viridis() +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ylim(1,5) +
-  annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=6, y=4.9,  label="Negative Emotions") +
-  annotate("rect", xmin=10.75, xmax=20.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=15.5, y=4.9,  label="Prototypical Aesthetic Emotions") +
-  annotate("rect", xmin=20.75, xmax=26.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=23.5, y=4.9,  label="Epistemic Emotions") +
-  annotate("rect", xmin=26.75, xmax=32.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=29.5, y=4.9,  label="Animation") +
-  annotate("rect", xmin=32.75, xmax=36.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=34.5, y=4.9,  label="Nostalgia/Relaxation") +
-  annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=37.5, y=4.9,  label="Sadness") +
-  annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=40.5, y=4.9,  label="Amusement")
-
-
-Profile_ThinkBeauty <- ggplot(Profile_DF_Melted%>%filter(`Yes/No`==1) %>% filter(Thematic=="The Thinks (19)" | Thematic=="Visual Beauty (37)"), 
-       aes(x=variable, y=value)) +
-  geom_line(aes(group=Thematic, color=Thematic)) +
-  scale_color_manual(values=c("purple","pink")) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ylim(1,5) +
-  annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=6, y=4.9,  label="Negative Emotions") +
-  annotate("rect", xmin=10.75, xmax=20.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=15.5, y=4.9,  label="Prototypical Aesthetic Emotions") +
-  annotate("rect", xmin=20.75, xmax=26.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=23.5, y=4.9,  label="Epistemic Emotions") +
-  annotate("rect", xmin=26.75, xmax=32.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=29.5, y=4.9,  label="Animation") +
-  annotate("rect", xmin=32.75, xmax=36.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=34.5, y=4.9,  label="Nostalgia/Relaxation") +
-  annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=37.5, y=4.9,  label="Sadness") +
-  annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=40.5, y=4.9,  label="Amusement")
 
 ```
 
@@ -995,11 +863,20 @@ ThemesAESTHEMOS_Melted_grp$variable <- fct_relevel(ThemesAESTHEMOS_Melted_grp$va
                                           )
 
 
+ThemesAESTHEMOS_Melted_grp$Thematic <- fct_relevel(ThemesAESTHEMOS_Melted_grp$Thematic,
+                                                   "Craft (66)", "The Feels (59)", "Expressive Potential of Games (51)",
+                                                   "Visual Beauty (37)", "The Thinks (19)",
+                                                   "Exploration Of Interpretation (10)", "All Games Are Art (9)")
+
 
 ggplot(ThemesAESTHEMOS_Melted_grp, aes(x=variable, y=Mean, color=Thematic)) +
   geom_errorbar(aes(ymin=ifelse(Mean-CI<=1, 1, Mean-CI), ymax=ifelse(Mean+CI>5, 5, Mean+CI)), position=position_dodge(0.5)) +
-  geom_point(position=position_dodge(0.5)) +
-  scale_color_viridis(discrete=T) +
+  geom_point(position=position_dodge(0.5))  +
+  scale_color_viridis_d(
+                      guide = guide_legend(direction = "horizontal", title.position = "top",
+                             label.position="bottom", label.hjust = 0.1, label.vjust = 0.5,
+                             label.theme = element_text(angle = 90), title=NULL
+                             )) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
@@ -1020,7 +897,10 @@ ggplot(ThemesAESTHEMOS_Melted_grp, aes(x=variable, y=Mean, color=Thematic)) +
 ggplot(ThemesAESTHEMOS_Melted_grp%>%filter(Thematic=="The Thinks (19)" | Thematic=="Visual Beauty (37)"), aes(x=variable, y=Mean, colour=Thematic)) +
   geom_errorbar(aes(ymin=ifelse(Mean-CI<=1, 1, Mean-CI), ymax=ifelse(Mean+CI>5, 5, Mean+CI)), position=position_dodge(0.5)) +
   geom_point(position=position_dodge(0.5)) +
-  scale_color_viridis(discrete=T) +
+  scale_color_viridis_d(begin=.43, end= .57, guide = guide_legend(direction = "horizontal", title.position = "top",
+                             label.position="bottom", label.hjust = 0.1, label.vjust = 0.5,
+                             label.theme = element_text(angle = 90), title=NULL
+                             )) +
   theme_minimal()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
