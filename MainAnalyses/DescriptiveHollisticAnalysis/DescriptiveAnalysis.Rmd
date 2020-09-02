@@ -32,7 +32,7 @@ library(psy)
 library(reshape2)
 
 ##Set Working DIR so Input&Output is correct (uncomment when running chunk directly. When knitted this lne should be standard behavior)
-#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 
 
@@ -733,7 +733,7 @@ ggplot(DataSet_AESTHEMOS_melted_grp, aes(x=variable, y=Mean)) +
 
 
 ggplot(DataSet_AESTHEMOS_melted_grp, aes(x=variable, y=Mean)) +
-  geom_errorbar(aes(ymin=ifelse(Mean-SE<1, 1, Mean-SE), ymax=ifelse(Mean+SE>5, 5, Mean+SE))) +
+  geom_errorbar(aes(ymin=ifelse(Mean-SD<1, 1, Mean-SD), ymax=ifelse(Mean+SD>5, 5, Mean+SD))) +
   geom_point() +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
