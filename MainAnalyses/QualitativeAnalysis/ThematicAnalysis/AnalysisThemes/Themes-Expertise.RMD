@@ -33,6 +33,7 @@ if(!require(ggsignif)){install.packages('ggsignif')}
 if(!require(reshape2)){install.packages('reshape2')}
 if(!require(viridis)){install.packages("viridis")}
 if(!require(LaplacesDemon)){install.packages("LaplacesDemon")}
+if(!require(GGally)){install.packages("GGally")}
 library(tidyverse, summarytools)
 library(readxl)
 library(patchwork)
@@ -40,6 +41,7 @@ library(ggsignif)
 library(reshape2)
 library(viridis)
 library(LaplacesDemon)
+library(GGally)
 ##Set Working DIR so Input&Output is correct
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
@@ -261,7 +263,7 @@ As professionalism does not have an exclusivity to expertise, we further looked 
 #View Self Reported Expertise:
 ggplot(ThemesExpertise_DF %>% filter(!is.na(ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._.)), 
         aes(`ExperienceGeneral.SQ001...Please_rate_the..__.I_am_experience.._.`)) + 
-        geom_histogram(binwidth = 5, fill="#A71C49") +
+        geom_histogram(binwidth = 5)
         xlab("Self Reported Experience")
 ```
 
@@ -845,8 +847,8 @@ ThemesAESTHEMOS_Melted_grp <- ThemesAESTHEMOS_Melted_grp %>%
   summarize(Mean=mean(value, na.rm=TRUE), 
             SD=sd(value, na.rm=TRUE), 
             CI=1.96*(sd(value, na.rm=TRUE)*(sqrt((n[1]-1)/n[1])))/sqrt(n[1]),
-            Likelihood_Lower = p.interval(na.omit(value))[1],
-            Likelihood_Upper = p.interval(na.omit(value))[2]
+            Likelihood_Lower = p.interval(na.omit(value), MM = F)[1],
+            Likelihood_Upper = p.interval(na.omit(value), MM = F)[2]
             )
 
 #Reordering AESTHEMOS Dimensions for Graph

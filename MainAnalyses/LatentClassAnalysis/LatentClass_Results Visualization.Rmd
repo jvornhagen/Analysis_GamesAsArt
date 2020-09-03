@@ -39,17 +39,17 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 
 ##Import Data Set
-DataSet_Mean <- read_csv("AesthemosAveragebyCluster.csv")
-DataSet_SD <- read_csv("AesthemoSTDbyCluster.csv")
+DataSet_Mean <- read_csv("ClusterAnalysis/AesthemosAveragebyCluster.csv")
+DataSet_SD <- read_csv("ClusterAnalysis/AesthemoSTDbyCluster.csv")
 ```
 
-```{r}
+```{r include=FALSE}
 #Prepare DataSet
 DataSet_Mean  <- mutate(DataSet_Mean, Cluster=as.factor(Cluster))
 DataSet_SD    <- mutate(DataSet_SD, Cluster=as.factor(Cluster))
 
 DataSet_Mean_Melted <- melt(DataSet_Mean, id.vars = "Cluster")
-DataSet_Mean_Melted <- rename(DataSet_Mean_Melted, "mean"=value)
+DataSet_Mean_Melted <- rename(DataSet_Mean_Melted, "Mean"=value)
 
 DataSet_SD_Melted <- melt(DataSet_SD, id.vars = "Cluster")
 DataSet_SD_Melted <- rename(DataSet_SD_Melted, "sd"=value)
@@ -89,7 +89,36 @@ DataSet_Combined$variable <- fct_relevel(DataSet_Combined$variable,
                                           )
 ```
 
-```{r}
+## Latent Class Analysis
+
+We want to know if there are groups of people with a similar answering behaviours. In machine learning terms, this is known as clustering and the groups are referred to as clusters. The 42 values with which a given person answered the questions can be interpreted as a vector of length 42. (In our sample of 174 participants we found 8 participants with invalid answers and excluded these participants from our latent-class analysis.) TODO: Are they excluded in your part as well?
+From our sample of 168 participants we interpret the values a person has given to the 42 questions as a datapoint in a 42-dimensional space. We use a clustering algorithm known as k-means to find clusters. The k-means algorithm is a randomized algorithm that takes as an input the data points and the numbers of clusters, namely k. As we do not know k in advance, we first have to determine the number of clusters suitable for our dataset. We will discuss this in more detail later on.
+
+1. The k-means clustering algorithm starts with randomly choosing k datapoints as centroids co~1~..co~k~ of the k clusters C~1~..C~k~. 
+2. It then assigns each datapoint d~j~ to the cluster C~i~ with the closest centroid co~i~.  As a distance measure the euclidean distance of the two vectors is used. 
+3. The algorithm then calculates for each cluster C~i~ its new centroid co~i~, by calculating the mean of all datapoints assigned to cluster C~i~ 
+4. Each datapoint is again assigned to the cluster with the closest centroid. 
+
+The algorithm repeats step 3 and 4 until a stable state is found, meaning that no datapoint is reassigned to a different cluster than in the previous round.
+
+There are different criterions used to determine the best suitable number of clusters for a given dataset. One of the state-of-the-art methods for k-means is the "elbow" method.
+
+In the elbow-method the k-means algorithm is run for different numbers of k. For each solution of k, the total within-cluster sum of squares (wss) is calculated. This number is an indicator of how close the datapoints are to their respective centroid. In an optimal setting, the datapoints in the same cluster are close together, while the datapoints assigned to different clusters are far apart, leading to a very small wss.
+As long as all datapoints are distinct, adding a cluster will decrease the wws. (Keep in mind that the wws will be zero if the number of clusters are the same as the number of datapoints). The goal is to find a number of clusters k, so that adding cluster k decreases the wws much more than adding cluster k+1. In a plot of wws versus the number of clusters this k can be found as a bend that looks like an elbow. This is where the method gets its name from.
+
+In our implementation we used the k-means python implementation from the library sklearn and took the best out of 1000 runs. To determine k we ran the same k-means implementation for each k in (1...10) and took the best out of 50 runs. You can find our corresponding ellbow plot here.
+
+
+TODO: In case it is too mathematically involved I tried to shorten it with less literals.
+Less mathematically involved:
+k-means description instead of the numbered list and elbow method instead of the elbow method paragraph
+
+The k-means clustering algorithm chooses k datapoints randomly as representatives of the k clusters. It then assigns each datapoint to the nearest cluster. As a next step, new representatives are calculated for the clusters. The new representative is the the mean of all the datapoints in the same cluster. Again each datapoint is reassigned to the closest cluster and the representatives are recalculated. This step is repeated until there are no more changes of cluster assignments.
+
+In the elbow-method one tries to find the number k so that adding cluster k, will decrease the error more dramatically than adding cluster k+1. The error is the the sum of the distance of the nodes within a cluster over all clusters. If one plots the error versus the number of clusters k, one can see a bend at the k where an additional cluster does not lead to the same steep reduction of error as before. In a plot of error versus number of clusters k, this looks like an elbow. 
+
+
+```{r, fig.width=16, fig.height=10}
 #Visualize Cluster
 ggplot(DataSet_Combined, aes(variable, Mean, color=Cluster)) +
   geom_point(position=position_dodge(0.5)) +
@@ -113,6 +142,7 @@ ggplot(DataSet_Combined, aes(variable, Mean, color=Cluster)) +
   annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
     annotate("text", x=37.5, y=5.1,  label="Sadness") +
   annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=40.5, y=5.1,  label="Amusement")
+    annotate("text", x=40.5, y=5.1,  label="Amusement") +
+  xlab(NULL)
 ```
 
