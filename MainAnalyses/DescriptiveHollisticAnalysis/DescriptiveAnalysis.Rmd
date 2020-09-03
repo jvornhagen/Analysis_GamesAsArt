@@ -1434,7 +1434,7 @@ ggplot(DataSet, aes(DataSet$`ExperienceGeneral[SQ001]. Please_rate_the..__[I_am_
 
 corExperience <- cor(DataSet$`ExperienceGeneral[SQ001]. Please_rate_the..__[I_am_experience.._]`, DataSet$`ExperienceGeneral[SQ003]. Please_rate_the..__[As_how_broad_wo.._]`, use = "complete.obs")
 ```
-These two measures had a medium correlation (*r =* `r corExperience`). Ths indicates, that a higher experience might come with a broadened taste.
+These two measures had a medium correlation (*r =* `r round(corExperience,2)`). Ths indicates, that a higher experience might come with a broadened taste.
 
 Additionally participants indicated the time since they started playing
 ```{r}
@@ -1447,7 +1447,7 @@ ggplot(DataSet, aes(DataSet$`ExperienceGeneral[SQ001]. Please_rate_the..__[I_am_
 corTime <- cor(DataSet$`Years. For_how_many_ye.._`, DataSet$`ExperienceGeneral[SQ001]. Please_rate_the..__[I_am_experience.._]`, use = "complete.obs")
 ```
 
-The measures had a medium correlation (*r =* `r corTime`)
+The measures had a medium correlation (*r =* `r round(corTime, 2)`)
 
 
 ```{r}
@@ -1460,7 +1460,7 @@ ggplot(DataSet, aes(DataSet$`ExperienceGeneral[SQ003]. Please_rate_the..__[As_ho
 corBroad <- cor(DataSet$`ExperienceGeneral[SQ003]. Please_rate_the..__[As_how_broad_wo.._]`, DataSet$CountYes, use = "complete.obs")
 ```
 
-As expected, the self report of broadness of taste correlates highly with the enjoyed genres (*r = *`r corBroad`).
+As expected, the self report of broadness of taste correlates highly with the enjoyed genres (*r = *`r round(corBroad,2)`).
 
 
 
