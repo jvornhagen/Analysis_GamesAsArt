@@ -1,0 +1,118 @@
+---
+title: "Latent Class Analysis - Results Visualization"
+author: "Anonymous"
+date: "13 8 2020"
+output:
+  html_document:
+    theme: sandstone
+editor_options:
+  chunk_output_type: console
+---
+
+
+```{r setup, include=TRUE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+This doc produces the plots and gives an overview of the results of the Latent Class Analysis
+
+
+```{r  include=FALSE}
+
+# Setup: Always Run!
+# This gets all packages and the file.
+
+if(!require(tidyverse)){install.packages('tidyverse')}
+if(!require(summarytools)){install.packages('summarytools')}
+if(!require(patchwork)){install.packages('patchwork')}
+if(!require(psy)){install.packages('psy')}
+if(!require(reshape2)){install.packages('reshape2')}
+if(!require(viridis)){install.packages('viridis')}
+library(tidyverse, summarytools, patchwork)
+library(psy)
+library(reshape2)
+library(viridis)
+
+##Set Working DIR so Input&Output is correct (uncomment when running chunk directly. When knitted this lne should be standard behavior)
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+
+
+##Import Data Set
+DataSet_Mean <- read_csv("AesthemosAveragebyCluster.csv")
+DataSet_SD <- read_csv("AesthemoSTDbyCluster.csv")
+```
+
+```{r}
+#Prepare DataSet
+DataSet_Mean  <- mutate(DataSet_Mean, Cluster=as.factor(Cluster))
+DataSet_SD    <- mutate(DataSet_SD, Cluster=as.factor(Cluster))
+
+DataSet_Mean_Melted <- melt(DataSet_Mean, id.vars = "Cluster")
+DataSet_Mean_Melted <- rename(DataSet_Mean_Melted, "mean"=value)
+
+DataSet_SD_Melted <- melt(DataSet_SD, id.vars = "Cluster")
+DataSet_SD_Melted <- rename(DataSet_SD_Melted, "sd"=value)
+
+DataSet_Combined <- full_join(DataSet_Mean_Melted, DataSet_SD_Melted, join_by="variable")
+
+#Reordering AESTHEMOS Dimensions for Graph
+DataSet_Combined$variable <- fct_relevel(DataSet_Combined$variable,
+                                          #Negative Emotions
+                                          "FeelingOfUgliness_1_AESTHEMOS", "FeelingOfUgliness_2_AESTHEMOS",
+                                          "Confusion_1_AESTHEMOS", "Confusion_2_AESTHEMOS",
+                                          "Anger_1_AESTHEMOS", "Anger_2_AESTHEMOS",
+                                          "Boredom_1_AESTHEMOS", "Boredom_2_AESTHEMOS",
+                                          "Uneasiness_1_AESTHEMOS", "Uneasiness_2_AESTHEMOS",
+                                          #Prototypical Aesthetic Emotions
+                                          "BeingMoved_1_AESTHEMOS", "BeingMoved_2_AESTHEMOS",
+                                          "Surprise_1_AESTHEMOS", "Surprise_2_AESTHEMOS",
+                                          "Fascination_1_AESTHEMOS", "Fascination_2_AESTHEMOS",
+                                          "FeelingOfBeauty_1_AESTHEMOS", "FeelingOfBeauty_2_AESTHEMOS",
+                                          "Awe_1_AESTHEMOS", "Awe_2_AESTHEMOS",
+                                          #Epistemic Emotions
+                                          "IntellectualChallenge_1_AESTHEMOS", "IntellectualChallenge_2_AESTHEMOS",
+                                          "Interest_1_AESTHEMOS", "Interest_2_AESTHEMOS",
+                                          "Insight_1_AESTHEMOS", "Insight_2_AESTHEMOS",
+                                          #Animation
+                                          "Energy_1_AESTHEMOS", "Energy_2_AESTHEMOS",
+                                          "Vitality_1_AESTHEMOS", "Vitality_2_AESTHEMOS",
+                                          "Enchantment_1_AESTHEMOS", "Enchantment_2_AESTHEMOS",
+                                          #Nostalgia
+                                          "Nostalgia_1_AESTHEMOS", "Nostalgia_2_AESTHEMOS",
+                                          "Relaxation_1_AESTHEMOS", "Relaxation_2_AESTHEMOS",
+                                          #Sadness
+                                          "Sadness_1_AESTHEMOS", "Sadness_2_AESTHEMOS",
+                                          #Amusement
+                                          "Humor_1_AESTHEMOS", "Humor_2_AESTHEMOS",
+                                          "Joy_1_AESTHEMOS", "Joy_2_AESTHEMOS"
+                                          )
+```
+
+```{r}
+#Visualize Cluster
+ggplot(DataSet_Combined, aes(variable, Mean, color=Cluster)) +
+  geom_point(position=position_dodge(0.5)) +
+  geom_errorbar(aes(ymin=ifelse(Mean-sd<=1, 1, Mean-sd), ymax=ifelse(Mean+sd>5, 5, Mean+sd)), position=position_dodge(0.5)) +
+  scale_color_viridis_d(end= .57, guide = guide_legend(direction = "horizontal", title.position = "top",
+                             label.position="bottom", label.hjust = 0.1, label.vjust = 0.5,
+                             label.theme = element_text(angle = 90), title=NULL
+                             )) +
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=6, y=5.1,  label="Negative Emotions") +
+  annotate("rect", xmin=10.75, xmax=20.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=15.5, y=5.1,  label="Prototypical Aesthetic Emotions") +
+  annotate("rect", xmin=20.75, xmax=26.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=23.5, y=5.1,  label="Epistemic Emotions") +
+  annotate("rect", xmin=26.75, xmax=32.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=29.5, y=5.1,  label="Animation") +
+  annotate("rect", xmin=32.75, xmax=36.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=34.5, y=5.1,  label="Nostalgia/Relaxation") +
+  annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=37.5, y=5.1,  label="Sadness") +
+  annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=40.5, y=5.1,  label="Amusement")
+```
+
