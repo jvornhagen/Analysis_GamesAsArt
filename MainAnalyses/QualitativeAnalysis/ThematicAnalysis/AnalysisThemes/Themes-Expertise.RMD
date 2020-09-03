@@ -32,12 +32,14 @@ if(!require(patchwork)){install.packages('patchwork')}
 if(!require(ggsignif)){install.packages('ggsignif')}
 if(!require(reshape2)){install.packages('reshape2')}
 if(!require(viridis)){install.packages("viridis")}
+if(!require(LaplacesDemon)){install.packages("LaplacesDemon")}
 library(tidyverse, summarytools)
 library(readxl)
 library(patchwork)
 library(ggsignif)
 library(reshape2)
 library(viridis)
+library(LaplacesDemon)
 ##Set Working DIR so Input&Output is correct
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
@@ -485,12 +487,12 @@ ggplot(data = meltedCorMat, aes(x=Var1, y=Var2, fill=value)) +
   coord_fixed()
 
 
-##Additional Scatter PLots
-#ggpairs(cor_DF, 
-#        upper= list(discrete="ratio"), 
-#        lower= list(continuous=wrap("points", position=position_jitter(height=.3, width=.3))),
-#        diag=list(discrete="blankDiag")
-#        )
+#Additional Scatter PLots
+ggpairs(cor_DF, 
+        upper= list(discrete="ratio"), 
+        lower= list(continuous=wrap("points", position=position_jitter(height=.3, width=.3))),
+        diag=list(discrete="blankDiag")
+        )
 ```
 
 
@@ -911,56 +913,167 @@ ggplot(ThemesAESTHEMOS_Melted_grp, aes(x=variable, y=Mean, color=Thematic)) +
   annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
     annotate("text", x=40.5, y=5.1,  label="Amusement")
 
-ggplot(ThemesAESTHEMOS_Melted_grp%>%filter(Thematic=="The Thinks (19)" | Thematic=="Visual Beauty (37)"), aes(x=variable, y=Mean, colour=Thematic)) +
+#ggplot(ThemesAESTHEMOS_Melted_grp%>%filter(Thematic=="The Thinks (19)" | Thematic=="Visual Beauty (37)"), aes(x=variable, y=Mean, colour=Thematic)) +
+#  geom_errorbar(aes(ymin=ifelse(Mean-CI<=1, 1, Mean-CI), ymax=ifelse(Mean+CI>5, 5, Mean+CI)), position=position_dodge(0.5)) +
+#  geom_point(position=position_dodge(0.5)) +
+#  scale_color_viridis_d(begin=.43, end= .57, guide = guide_legend(direction = "horizontal", title.position = "top",
+#                             label.position="bottom", label.hjust = 0.1, label.vjust = 0.5,
+#                             label.theme = element_text(angle = 90), title=NULL
+#                             )) +
+#  theme_minimal()+
+#  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+#    annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=6, y=5.1,  label="Negative Emotions") +
+#  annotate("rect", xmin=10.75, xmax=20.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=15.5, y=5.1,  label="Prototypical Aesthetic Emotions") +
+#  annotate("rect", xmin=20.75, xmax=26.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=23.5, y=5.1,  label="Epistemic Emotions") +
+#  annotate("rect", xmin=26.75, xmax=32.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=29.5, y=5.1,  label="Animation") +
+#  annotate("rect", xmin=32.75, xmax=36.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=34.5, y=5.1,  label="Nostalgia/Relaxation") +
+#  annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=37.5, y=5.1,  label="Sadness") +
+#  annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=40.5, y=5.1,  label="Amusement")
+
+
+#ggplot(ThemesAESTHEMOS_Melted_grp%>%filter(Thematic=="The Thinks (19)" | Thematic=="Visual Beauty (37)"), aes(x=variable, y=Mean, colour=Thematic)) +
+#  geom_errorbar(aes(ymin=Likelihood_Lower, ymax=Likelihood_Upper), position=position_dodge(0.5)) +
+#  geom_point(position=position_dodge(0.5)) +
+#  scale_color_viridis_d(begin=.43, end= .57, guide = guide_legend(direction = "horizontal", title.position = "top",
+#                             label.position="bottom", label.hjust = 0.1, label.vjust = 0.5,
+#                             label.theme = element_text(angle = 90), title=NULL
+#                             )) +
+#  theme_minimal()+
+#  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+#    annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=6, y=5.1,  label="Negative Emotions") +
+#  annotate("rect", xmin=10.75, xmax=20.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=15.5, y=5.1,  label="Prototypical Aesthetic Emotions") +
+#  annotate("rect", xmin=20.75, xmax=26.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=23.5, y=5.1,  label="Epistemic Emotions") +
+#  annotate("rect", xmin=26.75, xmax=32.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=29.5, y=5.1,  label="Animation") +
+#  annotate("rect", xmin=32.75, xmax=36.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=34.5, y=5.1,  label="Nostalgia/Relaxation") +
+#  annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=37.5, y=5.1,  label="Sadness") +
+#  annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
+#    annotate("text", x=40.5, y=5.1,  label="Amusement")
+
+#Cutting up my beloved graph so it fits better in the paper :,(
+
+#Negative Emotions
+Melted_NegEmotions <- ThemesAESTHEMOS_Melted_grp %>%
+  filter(variable == "FeelingOfUgliness_1_AESTHEMOS" | variable == "FeelingOfUgliness_2_AESTHEMOS"
+                                          | variable == "Confusion_1_AESTHEMOS" | variable ==  "Confusion_2_AESTHEMOS"
+                                          | variable == "Anger_1_AESTHEMOS" | variable == "Anger_2_AESTHEMOS"
+                                          | variable == "Boredom_1_AESTHEMOS" | variable ==  "Boredom_2_AESTHEMOS"
+                                          | variable == "Uneasiness_1_AESTHEMOS" | variable ==  "Uneasiness_2_AESTHEMOS")
+
+
+ggplot(Melted_NegEmotions, aes(x=variable, y=Mean, colour=Thematic)) +
   geom_errorbar(aes(ymin=ifelse(Mean-CI<=1, 1, Mean-CI), ymax=ifelse(Mean+CI>5, 5, Mean+CI)), position=position_dodge(0.5)) +
   geom_point(position=position_dodge(0.5)) +
-  scale_color_viridis_d(begin=.43, end= .57, guide = guide_legend(direction = "horizontal", title.position = "top",
+  scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+  scale_color_viridis_d(guide = guide_legend(direction = "horizontal", title.position = "top",
                              label.position="bottom", label.hjust = 0.1, label.vjust = 0.5,
                              label.theme = element_text(angle = 90), title=NULL
                              )) +
-  theme_minimal()+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=6, y=5.1,  label="Negative Emotions") +
-  annotate("rect", xmin=10.75, xmax=20.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=15.5, y=5.1,  label="Prototypical Aesthetic Emotions") +
-  annotate("rect", xmin=20.75, xmax=26.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=23.5, y=5.1,  label="Epistemic Emotions") +
-  annotate("rect", xmin=26.75, xmax=32.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=29.5, y=5.1,  label="Animation") +
-  annotate("rect", xmin=32.75, xmax=36.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=34.5, y=5.1,  label="Nostalgia/Relaxation") +
-  annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=37.5, y=5.1,  label="Sadness") +
-  annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=40.5, y=5.1,  label="Amusement")
+  ggtitle("AESTHEMOS Negative Emotions by Theme") +
+  theme(axis.text.x = element_text(size=13, face="bold")) +
+  xlab(NULL)
+
+#Aesthetic Emotions
+Melted_AestheticEmotions <- ThemesAESTHEMOS_Melted_grp %>%
+  filter(variable == "BeingMoved_1_AESTHEMOS" | variable== "BeingMoved_2_AESTHEMOS"
+                                          | variable== "Surprise_1_AESTHEMOS" | variable==  "Surprise_2_AESTHEMOS"
+                                          | variable== "Fascination_1_AESTHEMOS" | variable==  "Fascination_2_AESTHEMOS"
+                                          | variable== "FeelingOfBeauty_1_AESTHEMOS" | variable==  "FeelingOfBeauty_2_AESTHEMOS"
+                                          | variable== "Awe_1_AESTHEMOS" | variable==  "Awe_2_AESTHEMOS")
 
 
-ggplot(ThemesAESTHEMOS_Melted_grp%>%filter(Thematic=="The Thinks (19)" | Thematic=="Visual Beauty (37)"), aes(x=variable, y=Mean, colour=Thematic)) +
-  geom_errorbar(aes(ymin=Likelihood_Lower, ymax=Likelihood_Upper), position=position_dodge(0.5)) +
+ggplot(Melted_AestheticEmotions, aes(x=variable, y=Mean, colour=Thematic)) +
+  geom_errorbar(aes(ymin=ifelse(Mean-CI<=1, 1, Mean-CI), ymax=ifelse(Mean+CI>5, 5, Mean+CI)), position=position_dodge(0.5)) +
   geom_point(position=position_dodge(0.5)) +
-  scale_color_viridis_d(begin=.43, end= .57, guide = guide_legend(direction = "horizontal", title.position = "top",
+  scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+  scale_color_viridis_d(guide = guide_legend(direction = "horizontal", title.position = "top",
                              label.position="bottom", label.hjust = 0.1, label.vjust = 0.5,
                              label.theme = element_text(angle = 90), title=NULL
                              )) +
-  theme_minimal()+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=6, y=5.1,  label="Negative Emotions") +
-  annotate("rect", xmin=10.75, xmax=20.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=15.5, y=5.1,  label="Prototypical Aesthetic Emotions") +
-  annotate("rect", xmin=20.75, xmax=26.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=23.5, y=5.1,  label="Epistemic Emotions") +
-  annotate("rect", xmin=26.75, xmax=32.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=29.5, y=5.1,  label="Animation") +
-  annotate("rect", xmin=32.75, xmax=36.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=34.5, y=5.1,  label="Nostalgia/Relaxation") +
-  annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=37.5, y=5.1,  label="Sadness") +
-  annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=40.5, y=5.1,  label="Amusement")
+  ggtitle("AESTHEMOS Prototypical Aesthetic Emotions by Theme") +
+  theme(axis.text.x = element_text(size=15, face="bold")) +
+  xlab(NULL)
 
 
+#Epistemic Emotions
+Melted_EpistemicEmotions <- ThemesAESTHEMOS_Melted_grp %>%
+  filter(variable == "IntellectualChallenge_1_AESTHEMOS" | variable ==  "IntellectualChallenge_2_AESTHEMOS"
+                                          | variable ==  "Interest_1_AESTHEMOS" | variable ==   "Interest_2_AESTHEMOS"
+                                          | variable ==  "Insight_1_AESTHEMOS" | variable ==   "Insight_2_AESTHEMOS")
+
+
+ggplot(Melted_EpistemicEmotions, aes(x=variable, y=Mean, colour=Thematic)) +
+  geom_errorbar(aes(ymin=ifelse(Mean-CI<=1, 1, Mean-CI), ymax=ifelse(Mean+CI>5, 5, Mean+CI)), position=position_dodge(0.5)) +
+  geom_point(position=position_dodge(0.5)) +
+  scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+  scale_color_viridis_d(guide = guide_legend(direction = "horizontal", title.position = "top",
+                             label.position="bottom", label.hjust = 0.1, label.vjust = 0.5,
+                             label.theme = element_text(angle = 90), title=NULL
+                             )) +
+  ggtitle("AESTHEMOS Epistemic Emotions by Theme") +
+  theme(axis.text.x = element_text(size=15, face="bold")) +
+  xlab(NULL)
+
+#Animation
+Melted_Animation <- ThemesAESTHEMOS_Melted_grp %>%
+  filter(variable == "Energy_1_AESTHEMOS" | variable ==   "Energy_2_AESTHEMOS"
+                                          | variable ==  "Vitality_1_AESTHEMOS" | variable ==   "Vitality_2_AESTHEMOS"
+                                          | variable ==  "Enchantment_1_AESTHEMOS" | variable ==   "Enchantment_2_AESTHEMOS")
+
+
+ggplot(Melted_Animation, aes(x=variable, y=Mean, colour=Thematic)) +
+  geom_errorbar(aes(ymin=ifelse(Mean-CI<=1, 1, Mean-CI), ymax=ifelse(Mean+CI>5, 5, Mean+CI)), position=position_dodge(0.5)) +
+  geom_point(position=position_dodge(0.5)) +
+  scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+  scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+  scale_color_viridis_d(guide = guide_legend(direction = "horizontal", title.position = "top",
+                             label.position="bottom", label.hjust = 0.1, label.vjust = 0.5,
+                             label.theme = element_text(angle = 90), title=NULL
+                             )) +
+  ggtitle("AESTHEMOS Animation by Theme") +
+  theme(axis.text.x = element_text(size=15, face="bold")) +
+  xlab(NULL)
+
+#Nostalgia, Sadness and Amuesement
+Melted_Nostalgia <- ThemesAESTHEMOS_Melted_grp %>%
+  filter(variable ==  "Nostalgia_1_AESTHEMOS" | variable == "Nostalgia_2_AESTHEMOS"
+                                           | variable == "Relaxation_1_AESTHEMOS" | variable ==  "Relaxation_2_AESTHEMOS"
+                                          #Sadness
+                                           | variable == "Sadness_1_AESTHEMOS" | variable ==  "Sadness_2_AESTHEMOS"
+                                          #Amusement
+                                           | variable == "Humor_1_AESTHEMOS" | variable ==  "Humor_2_AESTHEMOS"
+                                           | variable == "Joy_1_AESTHEMOS" | variable ==  "Joy_2_AESTHEMOS")
+
+
+ggplot(Melted_Nostalgia, aes(x=variable, y=Mean, colour=Thematic)) +
+  geom_errorbar(aes(ymin=ifelse(Mean-CI<=1, 1, Mean-CI), ymax=ifelse(Mean+CI>5, 5, Mean+CI)), position=position_dodge(0.5)) +
+  geom_point(position=position_dodge(0.5)) +
+  scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+  scale_color_viridis_d(guide = guide_legend(direction = "horizontal", title.position = "top",
+                             label.position="bottom", label.hjust = 0.1, label.vjust = 0.5,
+                             label.theme = element_text(angle = 90), title=NULL
+                             )) +
+  ggtitle("AESTHEMOS Nostalgia/Relaxation, Sadness, and Amusement by Theme") +
+    annotate("rect", xmin=0.70, xmax=4.35, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=2.5, y=5.1,  label="Nostalgia/Relaxation", size=8) +
+  annotate("rect", xmin=4.65, xmax=6.35, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=5.5, y=5.1,  label="Sadness", size=8) +
+  annotate("rect", xmin=6.65, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=8.5, y=5.1,  label="Amusement", size=8) +
+  theme(axis.text.x = element_text(size=15, face="bold")) +
+  xlab(NULL)
 ```
 
 
