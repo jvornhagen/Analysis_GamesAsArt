@@ -86,9 +86,12 @@ ggplot(ThemesExpertise_DF, aes(ThemesExpertise_DF$OccupationVG, ThemesExpertise_
   geom_boxplot(width=0.1) +
   xlab("Expert") + 
   ylab("Themes Mentioned")
-  
+
+CountOfThemesMentioned <- data.frame(table(ThemesExpertise_DF$Count_Themes))
 
 ```
+Of our 174 participants, `r CountOfThemesMentioned[1,2]` mentioned `r CountOfThemesMentioned[1,1]`, `r CountOfThemesMentioned[2,2]` mentioned `r CountOfThemesMentioned[2,1]`, `r CountOfThemesMentioned[3,2]` mentioned `r CountOfThemesMentioned[3,1]`, and `r CountOfThemesMentioned[4,2]` mentioned `r CountOfThemesMentioned[4,1]` themes.
+
 
 ## Which Themes were mentioned how often by which group?
 
@@ -151,7 +154,7 @@ Professionals_DF <- ThemesExpertise_DF %>%
   mutate(expert = ifelse(OccupationVG == "Yes" & OccupationArt == "Yes", "Both",
                          ifelse(OccupationVG == "Yes" & OccupationArt == "No", "VG Professional",
                                 ifelse(OccupationVG == "No" & OccupationArt == "Yes", "Art Professional",
-                                       ifelse(OccupationVG == "No" & OccupationArt == "No","Laiperson",NA))))) %>%
+                                       ifelse(OccupationVG == "No" & OccupationArt == "No","Layperson",NA))))) %>%
   select(!1:2) %>%
   group_by(expert)
 Professionals_DF_melted <- melt(Professionals_DF, measure.vars = c(1:7))
@@ -164,12 +167,16 @@ Professionals_DF_summarized <- Professionals_DF_melted %>%
            ifelse(expert=="Both", Sum*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG == "Yes" & OccupationArt == "Yes")),
             ifelse(expert=="Art Professional", Sum*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG == "No" & OccupationArt == "Yes")),
              ifelse(expert=="VG Professional", Sum*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG == "Yes" & OccupationArt == "No")),
-              ifelse(expert=="Laiperson", Sum*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG == "No" & OccupationArt == "No")),
+              ifelse(expert=="Layperson", Sum*100/nrow(ThemesExpertise_DF %>% filter(OccupationVG == "No" & OccupationArt == "No")),
                      NA))))
          )
 
 
 Professionals_DF_summarized$expert <- fct_relevel(Professionals_DF_summarized$expert, "Both", "VG Professional", "Art Professional", "Layperson")
+Professionals_DF_summarized$expert <- fct_recode(Professionals_DF_summarized$expert, "Both (16)" = "Both",
+                                                 "VG Professional (9)" = "VG Professional",
+                                                 "Art Professional (33)" = "Art Professional",
+                                                 "Layperson (116)" = "Layperson")
 
 
 ggplot(Professionals_DF_summarized, aes(variable, percent, fill = expert)) +
@@ -230,7 +237,7 @@ ggplot(Professionals_DF_summarized, aes(variable, percent, fill = expert)) +
               y_position = yProfessionals,
               annotation = round(annotationsProfessionals,2))+
   scale_fill_viridis( discrete = TRUE, option = "D",
-    labels=c(paste("Layperson (", nrow(Professionals_DF %>% filter(expert=="Laiperson")), ")", sep=""), 
+    labels=c(paste("Layperson (", nrow(Professionals_DF %>% filter(expert=="Layperson")), ")", sep=""), 
              paste("Expert (", nrow(Professionals_DF %>% filter(expert=="Professional")), ")", sep="")),
     name="Profession") +
   ylim(0, 100) +
@@ -476,6 +483,14 @@ ggplot(data = meltedCorMat, aes(x=Var1, y=Var2, fill=value)) +
   guides(fill = guide_colorbar(barwidth = 7, barheight = 1,
                 title.position = "top", title.hjust = 0.5)) +
   coord_fixed()
+
+
+##Additional Scatter PLots
+#ggpairs(cor_DF, 
+#        upper= list(discrete="ratio"), 
+#        lower= list(continuous=wrap("points", position=position_jitter(height=.3, width=.3))),
+#        diag=list(discrete="blankDiag")
+#        )
 ```
 
 
@@ -827,7 +842,9 @@ ThemesAESTHEMOS_Melted_grp <- ThemesAESTHEMOS_Melted_grp %>%
   group_by(variable, Thematic) %>%
   summarize(Mean=mean(value, na.rm=TRUE), 
             SD=sd(value, na.rm=TRUE), 
-            CI=1.96*(sd(value, na.rm=TRUE)*(sqrt((n[1]-1)/n[1])))/sqrt(n[1])
+            CI=1.96*(sd(value, na.rm=TRUE)*(sqrt((n[1]-1)/n[1])))/sqrt(n[1]),
+            Likelihood_Lower = p.interval(na.omit(value))[1],
+            Likelihood_Upper = p.interval(na.omit(value))[2]
             )
 
 #Reordering AESTHEMOS Dimensions for Graph
@@ -917,6 +934,33 @@ ggplot(ThemesAESTHEMOS_Melted_grp%>%filter(Thematic=="The Thinks (19)" | Themati
     annotate("text", x=37.5, y=5.1,  label="Sadness") +
   annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
     annotate("text", x=40.5, y=5.1,  label="Amusement")
+
+
+ggplot(ThemesAESTHEMOS_Melted_grp%>%filter(Thematic=="The Thinks (19)" | Thematic=="Visual Beauty (37)"), aes(x=variable, y=Mean, colour=Thematic)) +
+  geom_errorbar(aes(ymin=Likelihood_Lower, ymax=Likelihood_Upper), position=position_dodge(0.5)) +
+  geom_point(position=position_dodge(0.5)) +
+  scale_color_viridis_d(begin=.43, end= .57, guide = guide_legend(direction = "horizontal", title.position = "top",
+                             label.position="bottom", label.hjust = 0.1, label.vjust = 0.5,
+                             label.theme = element_text(angle = 90), title=NULL
+                             )) +
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    annotate("rect", xmin=1, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=6, y=5.1,  label="Negative Emotions") +
+  annotate("rect", xmin=10.75, xmax=20.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=15.5, y=5.1,  label="Prototypical Aesthetic Emotions") +
+  annotate("rect", xmin=20.75, xmax=26.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=23.5, y=5.1,  label="Epistemic Emotions") +
+  annotate("rect", xmin=26.75, xmax=32.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=29.5, y=5.1,  label="Animation") +
+  annotate("rect", xmin=32.75, xmax=36.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=34.5, y=5.1,  label="Nostalgia/Relaxation") +
+  annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=37.5, y=5.1,  label="Sadness") +
+  annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=40.5, y=5.1,  label="Amusement")
+
+
 ```
 
 

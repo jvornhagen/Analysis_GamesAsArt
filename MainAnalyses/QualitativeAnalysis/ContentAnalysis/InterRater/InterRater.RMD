@@ -154,6 +154,9 @@ InterRaterCorrelation <- melt(InterRaterCorrelation, measure.vars = c(1:length(I
 
 InterRaterCorrelation <- InterRaterCorrelation %>%
   arrange(`Pearsons Phi`)
+
+
+write.csv(InterRaterCorrelation, "InterRater.csv")
 ```
 
 `r knitr::kable(InterRaterCorrelation)`
