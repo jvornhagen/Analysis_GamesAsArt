@@ -1,21 +1,16 @@
 # Introduction
 These folders are the data analysis for the paper XYZ
 
+# Required Software:
+Most analysis can be done using R 3.6.3
+- R can be found here: https://www.r-project.org/
+- We recommend using R Studio: https://rstudio.com/
+- all required packages are listed (and automatically installed) by each .Rmd File.
+
+The Latent Class analysis requires Jupyter
+- Jupyter can be found here: https://jupyter.org/install
+
 # Usage:
 First run GamesAsArt_DataPreparation.rmd in the DataPreparation Folder.
 This takes the RawData and prepares cleaned sub DataSets for the Network, qualitative, and demographic analysis.
 
-
-## Software and Versions Used:
-
-### DataPreparation was done with R Version: XYZ
-Packages: 
-- tidyverse version:
-
-
-
-#Note regarding Data Privacy and the Raw Data
-In order to assure the anonymity of our participants, the file RawData.csv was scanned for identfying information.
-For this reason the raw data does NOT include the following data:
-- the personal code participants gave to post-hoc withdraw their consent.
-- any names (X cases) written down by participants where changed to [Anonymized]
