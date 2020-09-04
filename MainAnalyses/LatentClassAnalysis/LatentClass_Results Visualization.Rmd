@@ -91,8 +91,8 @@ DataSet_Combined$variable <- fct_relevel(DataSet_Combined$variable,
 
 ## Latent Class Analysis
 
-We want to know if there are groups of people with a similar answering behaviours. In machine learning terms, this is known as clustering and the groups are referred to as clusters. The 42 values with which a given person answered the questions can be interpreted as a vector of length 42. (In our sample of 174 participants we found 8 participants with invalid answers and excluded these participants from our latent-class analysis.) TODO: Are they excluded in your part as well?
-From our sample of 168 participants we interpret the values a person has given to the 42 questions as a datapoint in a 42-dimensional space. We use a clustering algorithm known as k-means to find clusters. The k-means algorithm is a randomized algorithm that takes as an input the data points and the numbers of clusters, namely k. As we do not know k in advance, we first have to determine the number of clusters suitable for our dataset. We will discuss this in more detail later on.
+We want to know if there are groups of people with similar answering behaviours. In machine learning terms, this is known as clustering and the groups are referred to as clusters. In the questionaire, every person assigned to each of the 42 aesthemos item a value between 1 and 5. These 42 values with which a given person answered the questions can be interpreted as a vector of length 42. In our sample of 174 participants we found 6 participants with non-nummeric answers and excluded these participants from our latent-class analysis.
+From our remaining sample of 168 participants we interpret the values a person has given to the 42 questions as a datapoint in a 42-dimensional space. We use a clustering algorithm known as k-means to find clusters. The k-means algorithm is a randomized algorithm that takes as an input the data points and the numbers of clusters, namely k. As we do not know k in advance, we first have to determine the number of clusters suitable for our dataset. We will discuss this in more detail later on.
 
 1. The k-means clustering algorithm starts with randomly choosing k datapoints as centroids co~1~..co~k~ of the k clusters C~1~..C~k~. 
 2. It then assigns each datapoint d~j~ to the cluster C~i~ with the closest centroid co~i~.  As a distance measure the euclidean distance of the two vectors is used. 
@@ -107,15 +107,6 @@ In the elbow-method the k-means algorithm is run for different numbers of k. For
 As long as all datapoints are distinct, adding a cluster will decrease the wws. (Keep in mind that the wws will be zero if the number of clusters are the same as the number of datapoints). The goal is to find a number of clusters k, so that adding cluster k decreases the wws much more than adding cluster k+1. In a plot of wws versus the number of clusters this k can be found as a bend that looks like an elbow. This is where the method gets its name from.
 
 In our implementation we used the k-means python implementation from the library sklearn and took the best out of 1000 runs. To determine k we ran the same k-means implementation for each k in (1...10) and took the best out of 50 runs. You can find our corresponding ellbow plot here.
-
-
-TODO: In case it is too mathematically involved I tried to shorten it with less literals.
-Less mathematically involved:
-k-means description instead of the numbered list and elbow method instead of the elbow method paragraph
-
-The k-means clustering algorithm chooses k datapoints randomly as representatives of the k clusters. It then assigns each datapoint to the nearest cluster. As a next step, new representatives are calculated for the clusters. The new representative is the the mean of all the datapoints in the same cluster. Again each datapoint is reassigned to the closest cluster and the representatives are recalculated. This step is repeated until there are no more changes of cluster assignments.
-
-In the elbow-method one tries to find the number k so that adding cluster k, will decrease the error more dramatically than adding cluster k+1. The error is the the sum of the distance of the nodes within a cluster over all clusters. If one plots the error versus the number of clusters k, one can see a bend at the k where an additional cluster does not lead to the same steep reduction of error as before. In a plot of error versus number of clusters k, this looks like an elbow. 
 
 
 ```{r, fig.width=16, fig.height=10}
