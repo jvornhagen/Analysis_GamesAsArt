@@ -1,0 +1,293 @@
+---
+title: "Inter Rater Estimations Round 2"
+author: "Anonymous"
+output: 
+  html_document:
+    theme: sandstone
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+```{r setup, include=TRUE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+
+
+This file computes the interrater reliability from the first coding round.
+The coding of 1 (participant referred to this code) and 0 (participant did NOT refer to this code) was done manually.
+
+
+```{r  include=FALSE}
+
+# Setup: Always Run!
+# This gets all packages and the file.
+
+if(!require(tidyverse)){install.packages('tidyverse')}
+if(!require(readxl)){install.packages('readxl')}
+if(!require(summarytools)){install.packages('summarytools')}
+if(!require(patchwork)){install.packages('patchwork')}
+if(!require(ggsignif)){install.packages('ggsignif')}
+if(!require(reshape2)){install.packages('reshape2')}
+if(!require(viridis)){install.packages("viridis")}
+library(tidyverse, summarytools)
+library(readxl)
+library(patchwork)
+library(ggsignif)
+library(reshape2)
+library(viridis)
+##Set Working DIR so Input&Output is correct
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+```
+
+
+```{r}
+#Import Data Set
+##Note: This requires the complete Analysis Folder
+
+#Get Thmese
+InterRater_DF_Round2 <- read_xlsx("CA_RandomCoding_interrater_Round2.xlsx")
+
+
+```
+
+
+```{r}
+InterRaterRelation_Round2 <- data.frame(matrix(ncol = 4, nrow = 0))
+names(InterRaterRelation_Round2) <- c("Name_Round2", "Code_Round2", "Phi_Round2", "Agreement_Round2")
+
+##GameCharacters
+GameCharactersPHI <- round(cor(InterRater_DF_Round2$`Game characters`, InterRater_DF_Round2$`Game characters_2`, method="pearson"),2)
+GameCharactersAgreement <- CrossTable(InterRater_DF_Round2$`Game characters`, InterRater_DF_Round2$`Game characters_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Game characters`, InterRater_DF_Round2$`Game characters_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("GameCharacters", "Game characters", GameCharactersPHI, GameCharactersAgreement)
+
+##OtherPeople
+OtherPeoplePHI <- round(cor(InterRater_DF_Round2$`Other people`, InterRater_DF_Round2$`Other people_2`, method="pearson"),2)
+OtherPeopleAgreement <- CrossTable(InterRater_DF_Round2$`Other people`, InterRater_DF_Round2$`Other people_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Other people`, InterRater_DF_Round2$`Other people_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("OtherPeople", "Other people", OtherPeoplePHI, OtherPeopleAgreement)
+
+##Game
+GamePHI <- round(cor(InterRater_DF_Round2$Game, InterRater_DF_Round2$Game_2, method="pearson"),2)
+GameAgreement <- CrossTable(InterRater_DF_Round2$Game, InterRater_DF_Round2$Game_2)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$Game, InterRater_DF_Round2$Game_2)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("Game", "Game", GamePHI, GameAgreement)
+
+##UniqueExperience
+UniqueExperiencePHI <- round(cor(InterRater_DF_Round2$`Unique experience`, InterRater_DF_Round2$`Unique experience_2`, method="pearson"),2)
+UniqueExperienceAgreement <- CrossTable(InterRater_DF_Round2$`Unique experience`, InterRater_DF_Round2$`Unique experience_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Unique experience`, InterRater_DF_Round2$`Unique experience_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("UniqueExperience", "Unique experience", UniqueExperiencePHI, UniqueExperienceAgreement)
+
+##HardToDescribe
+HardToDescribePHI <- round(cor(InterRater_DF_Round2$`Hard-to-describe`, InterRater_DF_Round2$`Hard-to-describe_2`, method="pearson"),2)
+#No coder coded any 1 --> Therefore perfect agreement
+HardToDescribeAgreement <- 1
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("HardToDescribe", "Hard-to-describe", HardToDescribePHI, HardToDescribeAgreement)
+
+
+##PhysicalReactions
+PhysicalReactionsPHI <- round(cor(InterRater_DF_Round2$`Physical reactions`, InterRater_DF_Round2$`Physical reactions_2`, method="pearson"),2)
+PhysicalReactionsAgreement <- CrossTable(InterRater_DF_Round2$`Physical reactions`, InterRater_DF_Round2$`Physical reactions_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Physical reactions`, InterRater_DF_Round2$`Physical reactions_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("PhysicalReactions", "Physical reactions", PhysicalReactionsPHI, PhysicalReactionsAgreement)
+
+
+##Behavior
+BehaviorPHI <- round(cor(InterRater_DF_Round2$`Behaviour/actions`, InterRater_DF_Round2$`Behaviour/actions_2`, method="pearson"),2)
+#No coder coded any 1 --> Therefore perfect agreement
+BehaviorAgreement <- 1
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("Behavior", "Behaviour/actions", BehaviorPHI, BehaviorAgreement)
+
+##IntenseEmotions
+IntenseEmotionsPHI <- round(cor(InterRater_DF_Round2$`Intense/powerful emotions`, InterRater_DF_Round2$`Intense/powerful emotions_2`, method="pearson"),2)
+IntenseEmotionsAgreement <- CrossTable(InterRater_DF_Round2$`Intense/powerful emotions`, InterRater_DF_Round2$`Intense/powerful emotions_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Intense/powerful emotions`, InterRater_DF_Round2$`Intense/powerful emotions_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("IntenseEmotions", "Intense/powerful emotions", IntenseEmotionsPHI, IntenseEmotionsAgreement)
+
+##ConflictingEmotions
+ConflictingEmotionsPHI <- round(cor(InterRater_DF_Round2$`Conflicting feelings/mixed feelings`, InterRater_DF_Round2$`Conflicting feelings/mixed feelings_2`, method="pearson"),2)
+ConflictingEmotionsAgreement <- CrossTable(InterRater_DF_Round2$`Conflicting feelings/mixed feelings`, InterRater_DF_Round2$`Conflicting feelings/mixed feelings_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Conflicting feelings/mixed feelings`, InterRater_DF_Round2$`Conflicting feelings/mixed feelings_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("ConflictingEmotions", "Conflicting feelings/mixed feelings", ConflictingEmotionsPHI, ConflictingEmotionsAgreement)
+
+##Absorption
+AbsorptionPHI <- round(cor(InterRater_DF_Round2$`Total absorbtion`, InterRater_DF_Round2$`Total absorbtion_2`, method="pearson"),2)
+AbsorptionAgreement <- CrossTable(InterRater_DF_Round2$`Total absorbtion`, InterRater_DF_Round2$`Total absorbtion_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Total absorbtion`, InterRater_DF_Round2$`Total absorbtion_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("Absorption", "Total absorption", AbsorptionPHI, AbsorptionAgreement)
+
+##SpecialAthmosphere
+SpecialAthmospherePHI <- round(cor(InterRater_DF_Round2$`Special atmosphere`, InterRater_DF_Round2$`Special atmosphere_2`, method="pearson"),2)
+SpecialAthmosphereAgreement <- CrossTable(InterRater_DF_Round2$`Special atmosphere`, InterRater_DF_Round2$`Special atmosphere_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Special atmosphere`, InterRater_DF_Round2$`Special atmosphere_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("SpecialAthmosphere", "Special atmosphere", SpecialAthmospherePHI, SpecialAthmosphereAgreement)
+
+##Wholesomeness
+WholesomenessPHI <- round(cor(InterRater_DF_Round2$`Experience of wholeness`, InterRater_DF_Round2$`Experience of wholeness_2`, method="pearson"),2)
+WholesomenessAgreement <- CrossTable(InterRater_DF_Round2$`Experience of wholeness`, InterRater_DF_Round2$`Experience of wholeness_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Experience of wholeness`, InterRater_DF_Round2$`Experience of wholeness_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("Wholesomeness", "Experience of wholeness", WholesomenessPHI, WholesomenessAgreement)
+
+##LossOfControl
+LossOfControlPHI <- round(cor(InterRater_DF_Round2$`Loss of control`, InterRater_DF_Round2$`Loss of control_2`, method="pearson"),2)
+#No coder coded any 1 --> Therefore perfect agreement
+LossOfControlAgreement <- 1
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("LossOfControl", "Loss of control", LossOfControlPHI, LossOfControlAgreement)
+
+##OwnMemories
+OwnMemoriesPHI <- round(cor(InterRater_DF_Round2$`Associations to own memories`, InterRater_DF_Round2$`Associations to own memories_2`, method="pearson"),2)
+#On coder only coded 0 --> Therefore Agreement is purely 0|0 and not 0|0+1|1
+OwnMemoriesAgreement <- CrossTable(InterRater_DF_Round2$`Associations to own memories`, InterRater_DF_Round2$`Associations to own memories_2`)$prop.tbl[1,1]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("OwnMemories", "Associations to own memories", OwnMemoriesPHI, OwnMemoriesAgreement)
+
+##MeaningOfHumanExsistance
+MeaningOfHumanExsistancePHI <- round(cor(InterRater_DF_Round2$`Meaning of human life/existance`, InterRater_DF_Round2$`Meaning of human life/existance_2`, method="pearson"),2)
+MeaningOfHumanExsistanceAgreement <- CrossTable(InterRater_DF_Round2$`Meaning of human life/existance`, InterRater_DF_Round2$`Meaning of human life/existance_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Meaning of human life/existance`, InterRater_DF_Round2$`Meaning of human life/existance_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("MeaningOfHumanExsistance", "Meaning of human life/existance", MeaningOfHumanExsistancePHI, MeaningOfHumanExsistanceAgreement)
+
+##MeaningOfOwnLife
+MeaningOfOwnLifePHI <- round(cor(InterRater_DF_Round2$`Meaning of one's own life/existance`, InterRater_DF_Round2$`Meaning of one's own life/existance_2`, method="pearson"),2)
+MeaningOfOwnLifeAgreement <- CrossTable(InterRater_DF_Round2$`Meaning of one's own life/existance`, InterRater_DF_Round2$`Meaning of one's own life/existance_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Meaning of one's own life/existance`, InterRater_DF_Round2$`Meaning of one's own life/existance_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("MeaningOfOwnLife", "Meaning of one's own life/existance", MeaningOfOwnLifePHI, MeaningOfOwnLifeAgreement)
+
+##PersonalGrowth
+PersonalGrowthPHI <- round(cor(InterRater_DF_Round2$`Personal growth/change`, InterRater_DF_Round2$`Personal growth/change_2`, method="pearson"),2)
+PersonalGrowthAgreement <- CrossTable(InterRater_DF_Round2$`Personal growth/change`, InterRater_DF_Round2$`Personal growth/change_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Personal growth/change`, InterRater_DF_Round2$`Personal growth/change_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("PersonalGrowth", "Personal growth/change", PersonalGrowthPHI, PersonalGrowthAgreement)
+
+##Insight
+InsightPHI <- round(cor(InterRater_DF_Round2$`Insight/attitude change`, InterRater_DF_Round2$`Insight/attitude change_2`, method="pearson"),2)
+InsightAgreement <- CrossTable(InterRater_DF_Round2$`Insight/attitude change`, InterRater_DF_Round2$`Insight/attitude change_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Insight/attitude change`, InterRater_DF_Round2$`Insight/attitude change_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("Insight", "Insight/attitude change", InsightPHI, InsightAgreement)
+
+##Appreciation
+AppreciationPHI <- round(cor(InterRater_DF_Round2$`Appreciation of feeling and/or experience`, InterRater_DF_Round2$`Appreciation of feeling and/or experience_2`, method="pearson"),2)
+AppreciationAgreement <- CrossTable(InterRater_DF_Round2$`Appreciation of feeling and/or experience`, InterRater_DF_Round2$`Appreciation of feeling and/or experience_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Appreciation of feeling and/or experience`, InterRater_DF_Round2$`Appreciation of feeling and/or experience_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("Appreciation", "Appreciation of feeling and/or experience", AppreciationPHI, AppreciationAgreement)
+
+##MeaningOfContent
+MeaningOfContentPHI <- round(cor(InterRater_DF_Round2$`Meaning of the game's content/message/interpretation`, InterRater_DF_Round2$`Meaning of the game's content/message/interpretation_2`, method="pearson"),2)
+MeaningOfContentAgreement <- CrossTable(InterRater_DF_Round2$`Meaning of the game's content/message/interpretation`, InterRater_DF_Round2$`Meaning of the game's content/message/interpretation_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Meaning of the game's content/message/interpretation`, InterRater_DF_Round2$`Meaning of the game's content/message/interpretation_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("MeaningOfContent", "Meaning of the game's content/message/interpretation", MeaningOfContentPHI, MeaningOfContentAgreement)
+
+##DontKnowMeaning
+DontKnowMeaningPHI <- round(cor(InterRater_DF_Round2$`Don't know/can't describe meaning`, InterRater_DF_Round2$`Don't know/can't describe meaning_2`, method="pearson"),2)
+DontKnowMeaningAgreement <- CrossTable(InterRater_DF_Round2$`Don't know/can't describe meaning`, InterRater_DF_Round2$`Don't know/can't describe meaning_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Don't know/can't describe meaning`, InterRater_DF_Round2$`Don't know/can't describe meaning_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("DontKnowMeaning", "Don't know/can't describe meaning", DontKnowMeaningPHI, DontKnowMeaningAgreement)
+
+##NoMeaning
+NoMeaningPHI <- round(cor(InterRater_DF_Round2$`No meaning`, InterRater_DF_Round2$`No meaning_2`, method="pearson"),2)
+NoMeaningAgreement <- CrossTable(InterRater_DF_Round2$`No meaning`, InterRater_DF_Round2$`No meaning_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`No meaning`, InterRater_DF_Round2$`No meaning_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("NoMeaning", "No meaning", NoMeaningPHI, NoMeaningAgreement)
+
+##OtherMeaning
+OtherMeaningPHI <- round(cor(InterRater_DF_Round2$`Other meaning`, InterRater_DF_Round2$`Other thoughts and meaning_2`, method="pearson"),2)
+#On coder only coded 0 --> Therefore Agreement is purely 0|0 and not 0|0+1|1
+OtherMeaningAgreement <- CrossTable(InterRater_DF_Round2$`Other meaning`, InterRater_DF_Round2$`Other thoughts and meaning_2`)$prop.tbl[1,1]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("OtherMeaning", "Other thoughts and meaning", OtherMeaningPHI, OtherMeaningAgreement)
+
+##Harmony
+HarmonyPHI <- round(cor(InterRater_DF_Round2$Harmony, InterRater_DF_Round2$Harmony_2, method="pearson"),2)
+#On coder only coded 0 --> Therefore Agreement is purely 0|0 and not 0|0+1|1
+HarmonyAgreement <- CrossTable(InterRater_DF_Round2$Harmony, InterRater_DF_Round2$Harmony_2)$prop.tbl[1,1]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("Harmony", "Harmony", HarmonyPHI, HarmonyAgreement)
+
+##Discrepancy
+DiscrepancyPHI <- round(cor(InterRater_DF_Round2$Discrepancy, InterRater_DF_Round2$Discrepancy_2, method="pearson"),2)
+#On coder only coded 0 --> Therefore Agreement is purely 0|0 and not 0|0+1|1
+DiscrepancyAgreement <- CrossTable(InterRater_DF_Round2$Discrepancy, InterRater_DF_Round2$Discrepancy_2)$prop.tbl[1,1]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("Discrepancy", "Discrepancy", DiscrepancyPHI, DiscrepancyAgreement)
+
+##LastingImpression
+LastingImpressionPHI <- round(cor(InterRater_DF_Round2$`Lasting impression`, InterRater_DF_Round2$`Lasting impression_2`, method="pearson"),2)
+LastingImpressionAgreement <- CrossTable(InterRater_DF_Round2$`Lasting impression`, InterRater_DF_Round2$`Lasting impression_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Lasting impression`, InterRater_DF_Round2$`Lasting impression_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("LastingImpression", "Lasting impression", LastingImpressionPHI, LastingImpressionAgreement)
+
+##NeedAgain
+NeedAgainPHI <- round(cor(InterRater_DF_Round2$`Need to experience again`, InterRater_DF_Round2$`Need to experience again_2`, method="pearson"),2)
+NeedAgainAgreement <- CrossTable(InterRater_DF_Round2$`Need to experience again`, InterRater_DF_Round2$`Need to experience again_2`)$prop.tbl[1,1] +
+  CrossTable(InterRater_DF_Round2$`Need to experience again`, InterRater_DF_Round2$`Need to experience again_2`)$prop.tbl[2,2]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("NeedAgain", "Need to experience again", NeedAgainPHI, NeedAgainAgreement)
+
+##HealingExperience
+HealingExperiencePHI <- round(cor(InterRater_DF_Round2$`Healing experience`, InterRater_DF_Round2$`Healing experience_2`, method="pearson"),2)
+#On coder only coded 0 --> Therefore Agreement is purely 0|0 and not 0|0+1|1
+HealingExperienceAgreement <- CrossTable(InterRater_DF_Round2$`Healing experience`, InterRater_DF_Round2$`Healing experience_2`)$prop.tbl[1,1]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("HealingExperience", "Healing experience", HealingExperiencePHI, HealingExperienceAgreement)
+
+##Disseminate
+DisseminatePHI <- round(cor(InterRater_DF_Round2$`Want to disseminate the game to others`, InterRater_DF_Round2$`Want to disseminate the game to others_2`, method="pearson"),2)
+#No coder coded any 1 --> Therefore perfect agreement
+DisseminateAgreement <- 1
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("Disseminate", "Want to disseminate the game to others", DisseminatePHI, DisseminateAgreement)
+
+##Uncomfortable
+UncomfortablePHI <- round(cor(InterRater_DF_Round2$`Uncomfortable, unenjoyable`, InterRater_DF_Round2$`Uncomfortable, unenjoyable_2`, method="pearson"),2)
+#On coder only coded 0 --> Therefore Agreement is purely 0|0 and not 0|0+1|1
+UncomfortableAgreement <- CrossTable(InterRater_DF_Round2$`Uncomfortable, unenjoyable`, InterRater_DF_Round2$`Uncomfortable, unenjoyable_2`)$prop.tbl[1,1]
+
+InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("Uncomfortable", "Uncomfortable, unenjoyable", UncomfortablePHI, UncomfortableAgreement)
+
+```
+
+
+Writing the File
+```{r}
+write.csv(InterRaterRelation_Round2, "InterRater_Round2.csv")
+
+```
+
+
+
+
+`r knitr::kable(InterRaterCorrelation)`
+
+
+
+
+
+
+

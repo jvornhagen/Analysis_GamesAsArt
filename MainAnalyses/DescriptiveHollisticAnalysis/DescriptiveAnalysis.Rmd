@@ -661,6 +661,8 @@ DataSet_AESTHEMOS42_melted$variable <- fct_relevel(DataSet_AESTHEMOS42_melted$va
                                           "Anger_1_AESTHEMOS", "Anger_2_AESTHEMOS",
                                           "Boredom_1_AESTHEMOS", "Boredom_2_AESTHEMOS",
                                           "Uneasiness_1_AESTHEMOS", "Uneasiness_2_AESTHEMOS",
+                                          #Sadness
+                                          "Sadness_1_AESTHEMOS", "Sadness_2_AESTHEMOS",
                                           #Prototypical Aesthetic Emotions
                                           "BeingMoved_1_AESTHEMOS", "BeingMoved_2_AESTHEMOS",
                                           "Surprise_1_AESTHEMOS", "Surprise_2_AESTHEMOS",
@@ -678,8 +680,6 @@ DataSet_AESTHEMOS42_melted$variable <- fct_relevel(DataSet_AESTHEMOS42_melted$va
                                           #Nostalgia
                                           "Nostalgia_1_AESTHEMOS", "Nostalgia_2_AESTHEMOS",
                                           "Relaxation_1_AESTHEMOS", "Relaxation_2_AESTHEMOS",
-                                          #Sadness
-                                          "Sadness_1_AESTHEMOS", "Sadness_2_AESTHEMOS",
                                           #Amusement
                                           "Humor_1_AESTHEMOS", "Humor_2_AESTHEMOS",
                                           "Joy_1_AESTHEMOS", "Joy_2_AESTHEMOS"
@@ -701,16 +701,16 @@ ggplot(DataSet_AESTHEMOS42_melted_grp, aes(x=variable, y=Mean)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     annotate("rect", xmin=0.5, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
     annotate("text", x=6, y=5.1,  label="Negative Emotions") +
-  annotate("rect", xmin=10.75, xmax=20.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=15.5, y=5.1,  label="Prototypical Aesthetic Emotions") +
-  annotate("rect", xmin=20.75, xmax=26.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=23.5, y=5.1,  label="Epistemic Emotions") +
-  annotate("rect", xmin=26.75, xmax=32.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=29.5, y=5.1,  label="Animation") +
-  annotate("rect", xmin=32.75, xmax=36.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=34.5, y=5.1,  label="Nostalgia/Relaxation") +
-  annotate("rect", xmin=36.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=37.5, y=5.1,  label="Sadness") +
+  annotate("rect", xmin=10.75, xmax=12.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=11.5, y=5.1,  label="Sadness") +
+  annotate("rect", xmin=12.75, xmax=22.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=17.5, y=5.1,  label="Prototypical Aesthetic Emotions") +
+  annotate("rect", xmin=22.75, xmax=28.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=25.5, y=5.1,  label="Epistemic Emotions") +
+  annotate("rect", xmin=28.75, xmax=34.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=31.5, y=5.1,  label="Animation") +
+  annotate("rect", xmin=34.75, xmax=38.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=36.5, y=5.1,  label="Nostalgia/Relaxation") +
   annotate("rect", xmin=38.75, xmax=42.5, ymin=1, ymax=5, alpha=.2) +
     annotate("text", x=40.5, y=5.1,  label="Amusement")
 
@@ -750,6 +750,8 @@ DataSet_AESTHEMOS21_melted$variable <- fct_relevel(DataSet_AESTHEMOS21_melted$va
                                           "Anger",
                                           "Boredom",
                                           "Uneasiness",
+                                          #Sadness
+                                          "Sadness",
                                           #Prototypical Aesthetic Emotions
                                           "BeingMoved",
                                           "Surprise",
@@ -767,8 +769,6 @@ DataSet_AESTHEMOS21_melted$variable <- fct_relevel(DataSet_AESTHEMOS21_melted$va
                                           #Nostalgia
                                           "Nostalgia",
                                           "Relaxation",
-                                          #Sadness
-                                          "Sadness",
                                           #Amusement
                                           "Humor",
                                           "Joy"
@@ -780,7 +780,9 @@ DataSet_AESTHEMOS21_melted_grp <- DataSet_AESTHEMOS21_melted %>%
   group_by(variable) %>%
   summarize(Mean=mean(value), SD=sd(value), 
             CI=2.82*(sd(value)*(sqrt((168-1)/168)))/sqrt(168),
-            SE=sd(value)/sqrt(168)
+            SE=sd(value)/sqrt(168),
+            CIlow=Mean-CI,
+            CIhigh=Mean+CI
             )
 
 
@@ -797,19 +799,19 @@ ggplot(DataSet_AESTHEMOS21_melted_grp, aes(x=variable, y=Mean)) +
   })+
   xlab("")+
   annotate("rect", xmin=0.5, xmax=5.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=3.125, y=5.1,  label="Negative Emotions") +
-  annotate("rect", xmin=5.75, xmax=10.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=8, y=5.3,  label="Prototypical Aesthetic Emotions") +
-  annotate("rect", xmin=10.75, xmax=13.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=12, y=5.1,  label="Epistemic Emotions") +
-  annotate("rect", xmin=13.75, xmax=16.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=15, y=5.3,  label="Animation") +
-  annotate("rect", xmin=16.75, xmax=18.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=17.5, y=5.1,  label="Nostalgia/Relaxation") +
-  annotate("rect", xmin=18.75, xmax=19.25, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=19, y=5.3,  label="Sadness") +
+    annotate("text", x=3, y=5.1,  label="Negative Emotions") +
+  annotate("rect", xmin=5.75, xmax=6.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=6, y=5.1,  label="Sadness") +
+  annotate("rect", xmin=6.75, xmax=11.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=9, y=5.1,  label="Prototypical Aesthetic Emotions") +
+  annotate("rect", xmin=11.75, xmax=14.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=13, y=5.1,  label="Epistemic Emotions") +
+  annotate("rect", xmin=14.75, xmax=17.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=16, y=5.1,  label="Animation") +
+  annotate("rect", xmin=17.75, xmax=19.25, ymin=1, ymax=5, alpha=.2) +
+    annotate("text", x=18.5, y=5.1,  label="Nostalgia/Relaxation") +
   annotate("rect", xmin=19.75, xmax=21.5, ymin=1, ymax=5, alpha=.2) +
-    annotate("text", x=20.375, y=5.1,  label="Amusement")
+    annotate("text", x=20.5, y=5.1,  label="Amusement")
 
 
 ##The following is the computation with Credibility Intervals
@@ -833,6 +835,21 @@ ggplot(DataSet_AESTHEMOS21_melted_grp, aes(x=variable, y=Mean)) +
 #    annotate("text", x=37.5, y=5.1,  label="Sadness") +
 #  annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
 #    annotate("text", x=40.5, y=5.1,  label="Amusement")
+
+##For the table in the paper:
+DataSet_AESTHEMOS21_melted_grp_paper <- DataSet_AESTHEMOS21_melted %>%
+  group_by(variable) %>%
+  summarize(Mean=mean(value), SD=sd(value), 
+            CI=2.82*(sd(value)*(sqrt((168-1)/168)))/sqrt(168),
+            CIlow=Mean-CI,
+            CIhigh=Mean+CI
+            ) %>%
+  mutate(Mean=round(Mean,2)) %>%
+  mutate(SD=round(SD,2)) %>%
+  mutate(CIlow=round(CIlow,2)) %>%
+  mutate(CIhigh=round(CIhigh,2))
+
+
 ```
 
 
