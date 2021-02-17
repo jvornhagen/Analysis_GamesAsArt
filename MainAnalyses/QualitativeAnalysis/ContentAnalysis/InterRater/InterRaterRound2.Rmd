@@ -9,7 +9,6 @@ editor_options:
 ---
 
 
-
 ```{r setup, include=TRUE, echo=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
