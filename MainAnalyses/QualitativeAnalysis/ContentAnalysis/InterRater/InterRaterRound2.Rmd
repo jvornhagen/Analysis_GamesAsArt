@@ -273,8 +273,16 @@ InterRaterRelation_Round2[nrow(InterRaterRelation_Round2)+1,] = c("Uncomfortable
 
 ```
 
+## Compute Mean and SD of Agreement
+```{r}
+MeanAgreement2 <- round(mean(as.numeric(InterRaterRelation_Round2$Agreement_Round2)),2)
+SDAgreement2   <- round(sd(as.numeric(InterRaterRelation_Round2$Agreement_Round2)),2)
+```
 
-Writing the File
+
+
+
+## Writing the File
 ```{r}
 write.csv(InterRaterRelation_Round2, "InterRater_Round2.csv")
 
