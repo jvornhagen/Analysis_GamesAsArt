@@ -27,7 +27,7 @@ The Latent Class analysis requires Jupyter
 
 ## Usage:
 First run GamesAsArt_DataPreparation.rmd in the DataPreparation Folder.
-This takes the RawData and prepares cleaned sub DataSets for the Network, qualitative, and demographic analysis.
+This takes the RawData and prepares cleaned sub DataSets for the Network, qualitative, and demographic/quantitative analyses.
 
 ## Latent Class Analysis in Jupyter:
 This jupyter notebook reads in the file "NetworkAnalysis_DataFile.csv" performs a k-means cluster algorithm with 2 clusters and writes the following three csv-files:
