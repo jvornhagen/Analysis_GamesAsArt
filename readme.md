@@ -16,11 +16,13 @@ Proceed then to the Main Analyses Folder which includes a dedicated folder for e
 
 ## Required Software:
 Most analysis can be done using R 3.6.3
+
 - R can be found here: https://www.r-project.org/
 - We recommend using R Studio: https://rstudio.com/
 - all required packages are listed in (and automatically installed by) each .Rmd File.
 
 The Latent Class analysis requires Jupyter
+
 - Jupyter can be found here: https://jupyter.org/install
 
 ## Usage:
