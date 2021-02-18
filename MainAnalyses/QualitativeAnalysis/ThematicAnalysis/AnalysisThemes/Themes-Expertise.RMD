@@ -1,7 +1,6 @@
 ---
 title: "Analysis: Themes and Expertise"
 author: "Anonymous"
-date: "13 8 2020"
 output: 
   html_document:
     theme: sandstone
