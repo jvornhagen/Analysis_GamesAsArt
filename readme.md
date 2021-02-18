@@ -4,6 +4,7 @@ These folders are the data analysis for the paper ''My Soul Got a Little Bit Cle
 # Read use:
 
 Each main analysis folder contains an html file (knitted from an RMD file of the same name in the same folder). These files contian an easily readable breakdown of all analyses we conducted.
+
 For more information please refer to the paper and/or it's corresponding author; For reproducing the results please refer to below:
 
 
