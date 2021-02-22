@@ -26,7 +26,7 @@ To identify why participants considered the recounted videogame experience as "a
 
 First, two coders individually read through the entire data set to familiarise themselves with the content, and noted down first ideas and observations. We decided to involve two coders, instead of one, as we assumed it will facilitate the theme generating process when more than one coder is familiar with the entire data. Second, the coders were asked to individually generate initial codes that represented the whole data set. Sentences formed the smallest coding units, to which multiple codes could be assigned. Codes were developed regarding the semantic content (i.e., what participants wrote) as well as on latent level (i.e., participants’ assumption underlining the semantic content). After discussing and combining the codes, both coders applied the coding scheme to the entire data set. This was done in order to facilitate finding illustrative quotes when reporting the themes later. The final 69 codes were collided, reevaluated, and merged to initial themes over several discussion sessions among the authors. During this process, the coders draw several thematic maps to consider the relations between the initial themes. Finally, one coder applied the initial themes to the entire data set to ensure the themes cover all instances, and drew a thematic map of the final themes.
 
-The inductive thematic analyses resulted in a final set of seven themes: Appreciating the Craft and Artisanship; Expressive Potential of Games; Awe and Wanderlust; Getting the Feels; Makes You Think; Room for Interpretation.
+The inductive thematic analyses resulted in a final set of seven themes: Appreciating the Craft and Artisanship; Expressive Potential of Games; Awe and Wanderlust; Getting Getting The Feels; Makes You Think; Room for Interpretation; All Games are Art.
 
 
 ```{r  include=FALSE}
@@ -67,8 +67,18 @@ CIFunction <- function(value, n, CritNumber) {
 #Import Data Sets
 ##Note: This requires the complete Analysis Folder
 
-#Get Thmese
+#Get Themse
 Themes_DF <- read_xlsx("Themes-Expertise.xlsx")
+
+#Rename Themes to final names:
+Themes_DF <- Themes_DF %>%
+  rename("Getting The Feels"=`The Feels`) %>%
+  rename("Expressive Potential of Games" = `Expressive potential of games`) %>%
+  rename("Appreciating the Craft and Artisanship" = craft) %>%
+  rename("Room for Interpretation" = `exploration of interpretation`) %>%
+  rename("Makes You Think" = `the thinks`) %>%
+  rename("Awe and Wanderlust" = `visual beauty`) %>%
+  rename("All Games are Art" = `all games art`)
 
 #Get Expertise Measures
 DataSet <- read.csv("../../../DescriptiveHollisticAnalysis/DescriptiveAnalysis_DataFile.csv")
@@ -92,7 +102,7 @@ First, we separated experts(`r nrow(ThemesExpertise_DF %>% filter(OccupationVG =
 ```{r}
 #Create Count:
 ThemesExpertise_DF <- ThemesExpertise_DF %>%
-  mutate(Count_Themes = `The Feels`+`Expressive potential of games`+craft+`exploration of interpretation`+`the thinks`+`visual beauty`+`all games art`)
+  mutate(Count_Themes = `Getting The Feels`+`Expressive Potential of Games`+`Appreciating the Craft and Artisanship`+`Room for Interpretation`+`Makes You Think`+`Awe and Wanderlust`+`All Games are Art`)
 
 ggplot(ThemesExpertise_DF, aes(ThemesExpertise_DF$OccupationVG, ThemesExpertise_DF$Count_Themes)) +
   geom_violin() +
@@ -111,25 +121,25 @@ Of our 174 participants, `r CountOfThemesMentioned[1,2]` mentioned `r CountOfThe
 
 ```{r}
 
-nThemes <- data.frame(nAllGamesArt = sum(Themes_DF$`all games art`),
-                      nCraft = sum(Themes_DF$craft),
-                      nExploration = sum(Themes_DF$`exploration of interpretation`),
-                      nExpressive = sum(Themes_DF$`Expressive potential of games`),
-                      nFeels = sum(Themes_DF$`The Feels`),
-                      nThinks = sum(Themes_DF$`the thinks`),
-                      nBeauty = sum(Themes_DF$`visual beauty`))
+nThemes <- data.frame(nAllGamesArt = sum(Themes_DF$`All Games are Art`),
+                      nCraft = sum(Themes_DF$`Appreciating the Craft and Artisanship`),
+                      nExploration = sum(Themes_DF$`Room for Interpretation`),
+                      nExpressive = sum(Themes_DF$`Expressive Potential of Games`),
+                      nFeels = sum(Themes_DF$`Getting The Feels`),
+                      nThinks = sum(Themes_DF$`Makes You Think`),
+                      nBeauty = sum(Themes_DF$`Awe and Wanderlust`))
 
 JobExpert_DF <- ThemesExpertise_DF %>%
   select(14, 3:9) %>%
   pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
   #Renaming is done per hand from nThemes as fct_recode doesn't play well with Parse
-    mutate(`Theme` = fct_recode(`Theme`, "All Games Are Art (yes = 9)" = "all games art",
-                                 "Craft (yes = 66)" = "craft",
-                                 "Exploration Of Interpretation (yes = 10)" = "exploration of interpretation",
-                                 "Expressive Potential of Games (yes = 51)" = "Expressive potential of games",
-                                 "The Feels (yes = 59)" = "The Feels",
-                                 "The Thinks (yes = 19)" = "the thinks",
-                                 "Visual Beauty (yes = 37)" = "visual beauty")) %>%
+    mutate(`Theme` = fct_recode(`Theme`, "All Games Are Art (yes = 9)" = "All Games are Art",
+                                 "Craft (yes = 66)" = "Appreciating the Craft and Artisanship",
+                                 "Room for Interpretation (yes = 10)" = "Room for Interpretation",
+                                 "Expressive Potential of Games (yes = 51)" = "Expressive Potential of Games",
+                                 "Getting The Feels (yes = 59)" = "Getting The Feels",
+                                 "Makes You Think (yes = 19)" = "Makes You Think",
+                                 "Awe and Wanderlust (yes = 37)" = "Awe and Wanderlust")) %>%
   group_by(OccupationVG, `Theme`) %>%
   summarize(total = sum(`Sum`))
 
@@ -293,13 +303,13 @@ Median_DF <- ThemesExpertise_DF %>%
 Median_DF_Pivot <- Median_DF %>%
   pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
   #Renaming is done per hand from nThemes as fct_recode doesn't play well with Parse
-  mutate(`Theme` = fct_recode(`Theme`, "All Games Are Art (yes = 9)" = "all games art",
-                               "Craft (yes = 66)" = "craft",
-                               "Exploration Of Interpretation (yes = 10)" = "exploration of interpretation",
-                               "Expressive Potential of Games (yes = 51)" = "Expressive potential of games",
-                               "The Feels (yes = 59)" = "The Feels",
-                               "The Thinks (yes = 19)" = "the thinks",
-                               "Visual Beauty (yes = 37)" = "visual beauty")) %>%
+  mutate(`Theme` = fct_recode(`Theme`, "All Games Are Art (yes = 9)" = "All Games are Art",
+                               "Craft (yes = 66)" = "Appreciating the Craft and Artisanship",
+                               "Room for Interpretation (yes = 10)" = "Room for Interpretation",
+                               "Expressive Potential of Games (yes = 51)" = "Expressive Potential of Games",
+                               "Getting The Feels (yes = 59)" = "Getting The Feels",
+                               "Makes You Think (yes = 19)" = "Makes You Think",
+                               "Awe and Wanderlust (yes = 37)" = "Awe and Wanderlust")) %>%
   group_by(SelfReportExpert, `Theme`) %>%
   summarize(total = sum(`Sum`))
 
@@ -359,13 +369,13 @@ Mean_DF <- ThemesExpertise_DF %>%
 Mean_DF_Pivot <- Mean_DF %>%
   pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
   #Renaming is done per hand from nThemes as fct_recode doesn't play well with Parse
-  mutate(`Theme` = fct_recode(`Theme`, "All Games Are Art (yes = 9)" = "all games art",
-                               "Craft (yes = 66)" = "craft",
-                               "Exploration Of Interpretation (yes = 10)" = "exploration of interpretation",
-                               "Expressive Potential of Games (yes = 51)" = "Expressive potential of games",
-                               "The Feels (yes = 59)" = "The Feels",
-                               "The Thinks (yes = 19)" = "the thinks",
-                               "Visual Beauty (yes = 37)" = "visual beauty")) %>%
+  mutate(`Theme` = fct_recode(`Theme`, "All Games Are Art (yes = 9)" = "All Games are Art",
+                               "Craft (yes = 66)" = "Appreciating the Craft and Artisanship",
+                               "Room for Interpretation (yes = 10)" = "Room for Interpretation",
+                               "Expressive Potential of Games (yes = 51)" = "Expressive Potential of Games",
+                               "Getting The Feels (yes = 59)" = "Getting The Feels",
+                               "Makes You Think (yes = 19)" = "Makes You Think",
+                               "Awe and Wanderlust (yes = 37)" = "Awe and Wanderlust")) %>%
   group_by(SelfReportExpert, `Theme`) %>%
   summarize(total = sum(`Sum`))
 
@@ -420,13 +430,13 @@ Middle_DF <- ThemesExpertise_DF %>%
 Middle_DF_Pivot <- Middle_DF %>%
   pivot_longer(2:8, names_to="Theme", values_to = "Sum") %>%
   #Renaming is done per hand from nThemes as fct_recode doesn't play well with Parse
-  mutate(`Theme` = fct_recode(`Theme`, "All Games Are Art (yes = 9)" = "all games art",
-                               "Craft (yes = 66)" = "craft",
-                               "Exploration Of Interpretation (yes = 10)" = "exploration of interpretation",
-                               "Expressive Potential of Games (yes = 51)" = "Expressive potential of games",
-                               "The Feels (yes = 59)" = "The Feels",
-                               "The Thinks (yes = 19)" = "the thinks",
-                               "Visual Beauty (yes = 37)" = "visual beauty")) %>%
+  mutate(`Theme` = fct_recode(`Theme`, "All Games Are Art (yes = 9)" = "All Games are Art",
+                               "Craft (yes = 66)" = "Appreciating the Craft and Artisanship",
+                               "Room for Interpretation (yes = 10)" = "Room for Interpretation",
+                               "Expressive Potential of Games (yes = 51)" = "Expressive Potential of Games",
+                               "Getting The Feels (yes = 59)" = "Getting The Feels",
+                               "Makes You Think (yes = 19)" = "Makes You Think",
+                               "Awe and Wanderlust (yes = 37)" = "Awe and Wanderlust")) %>%
   group_by(SelfReportExpert, `Theme`) %>%
   summarize(total = sum(`Sum`))
 
@@ -531,13 +541,13 @@ ThemesAESTHEMOS_DF_Pivot <- ThemesAESTHEMOS_DF_Pivot_Help %>%
   mutate(`Yes/No`=as.factor(`Yes/No`)) %>%
   mutate(`Thematic`=as.factor(`Thematic`)) %>%
   #This is done manually from the nThemes data frame as fct_recode doesn't work with parse
-  mutate(`Thematic` = fct_recode(`Thematic`, "All Games Are Art (9)" = "all games art",
-                                 "Craft (66)" = "craft",
-                                 "Exploration Of Interpretation (10)" = "exploration of interpretation",
-                                 "Expressive Potential of Games (51)" = "Expressive potential of games",
-                                 "The Feels (59)" = "The Feels",
-                                 "The Thinks (19)" = "the thinks",
-                                 "Visual Beauty (37)" = "visual beauty")) %>%
+  mutate(`Thematic` = fct_recode(`Thematic`, "All Games Are Art (9)" = "All Games are Art",
+                                 "Craft (66)" = "Appreciating the Craft and Artisanship",
+                                 "Room for Interpretation (10)" = "Room for Interpretation",
+                                 "Expressive Potential of Games (51)" = "Expressive Potential of Games",
+                                 "Getting The Feels (59)" = "Getting The Feels",
+                                 "Makes You Think (19)" = "Makes You Think",
+                                 "Awe and Wanderlust (37)" = "Awe and Wanderlust")) %>%
   group_by(`Thematic`, `Yes/No`) %>%
   summarize_if(is.numeric, list(~mean(., na.rm=TRUE), ~sd(., na.rm=TRUE)), na.rm=TRUE)
 
@@ -828,13 +838,13 @@ ThemesAESTHEMOS_Melted <- ThemesAESTHEMOS_DF_Pivot_Help %>%
   mutate(`Yes/No`=as.factor(`Yes/No`)) %>%
   mutate(`Thematic`=as.factor(`Thematic`)) %>%
   #This is done manually from the nThemes data frame as fct_recode doesn't work with parse
-  mutate(`Thematic` = fct_recode(`Thematic`, "All Games Are Art (9)" = "all games art",
-                                 "Craft (66)" = "craft",
-                                 "Exploration Of Interpretation (10)" = "exploration of interpretation",
-                                 "Expressive Potential of Games (51)" = "Expressive potential of games",
-                                 "The Feels (59)" = "The Feels",
-                                 "The Thinks (19)" = "the thinks",
-                                 "Visual Beauty (37)" = "visual beauty")) %>%
+  mutate(`Thematic` = fct_recode(`Thematic`, "All Games Are Art (9)" = "All Games are Art",
+                                 "Craft (66)" = "`Appreciating the Craft and Artisanship`",
+                                 "Room for Interpretation (10)" = "Room for Interpretation",
+                                 "Expressive Potential of Games (51)" = "Expressive Potential of Games",
+                                 "Getting The Feels (59)" = "Getting The Feels",
+                                 "Makes You Think (19)" = "Makes You Think",
+                                 "Awe and Wanderlust (37)" = "Awe and Wanderlust")) %>%
   group_by(`Thematic`, `Yes/No`)
 
 
@@ -894,9 +904,9 @@ ThemesAESTHEMOS_Melted_grp$variable <- fct_relevel(ThemesAESTHEMOS_Melted_grp$va
 
 
 ThemesAESTHEMOS_Melted_grp$Thematic <- fct_relevel(ThemesAESTHEMOS_Melted_grp$Thematic,
-                                                   "Craft (66)", "The Feels (59)", "Expressive Potential of Games (51)",
-                                                   "Visual Beauty (37)", "The Thinks (19)",
-                                                   "Exploration Of Interpretation (10)", "All Games Are Art (9)")
+                                                   "Craft (66)", "Getting The Feels (59)", "Expressive Potential of Games (51)",
+                                                   "Awe and Wanderlust (37)", "Makes You Think (19)",
+                                                   "Room for Interpretation (10)", "All Games Are Art (9)")
 
 
 ggplot(ThemesAESTHEMOS_Melted_grp, aes(x=variable, y=Mean, color=Thematic)) +
@@ -924,7 +934,7 @@ ggplot(ThemesAESTHEMOS_Melted_grp, aes(x=variable, y=Mean, color=Thematic)) +
   annotate("rect", xmin=38.75, xmax=42, ymin=1, ymax=5, alpha=.2) +
     annotate("text", x=40.5, y=5.1,  label="Amusement")
 
-#ggplot(ThemesAESTHEMOS_Melted_grp%>%filter(Thematic=="The Thinks (19)" | Thematic=="Visual Beauty (37)"), aes(x=variable, y=Mean, colour=Thematic)) +
+#ggplot(ThemesAESTHEMOS_Melted_grp%>%filter(Thematic=="Makes You Think (19)" | Thematic=="Awe and Wanderlust (37)"), aes(x=variable, y=Mean, colour=Thematic)) +
 #  geom_errorbar(aes(ymin=ifelse(Mean-CI<=1, 1, Mean-CI), ymax=ifelse(Mean+CI>5, 5, Mean+CI)), position=position_dodge(0.5)) +
 #  geom_point(position=position_dodge(0.5)) +
 #  scale_color_viridis_d(begin=.43, end= .57, guide = guide_legend(direction = "horizontal", title.position = "top",
@@ -949,7 +959,7 @@ ggplot(ThemesAESTHEMOS_Melted_grp, aes(x=variable, y=Mean, color=Thematic)) +
 #    annotate("text", x=40.5, y=5.1,  label="Amusement")
 
 
-#ggplot(ThemesAESTHEMOS_Melted_grp%>%filter(Thematic=="The Thinks (19)" | Thematic=="Visual Beauty (37)"), aes(x=variable, y=Mean, colour=Thematic)) +
+#ggplot(ThemesAESTHEMOS_Melted_grp%>%filter(Thematic=="Makes You Think (19)" | Thematic=="Awe and Wanderlust (37)"), aes(x=variable, y=Mean, colour=Thematic)) +
 #  geom_errorbar(aes(ymin=Likelihood_Lower, ymax=Likelihood_Upper), position=position_dodge(0.5)) +
 #  geom_point(position=position_dodge(0.5)) +
 #  scale_color_viridis_d(begin=.43, end= .57, guide = guide_legend(direction = "horizontal", title.position = "top",
